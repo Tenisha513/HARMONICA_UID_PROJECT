@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Team Train</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  overflow:hidden;
+  height:100vh;
+  background:
+  radial-gradient(circle at top,#2d1b12,#120d09 60%);
+  font-family:Arial, Helvetica, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.scene{
+  width:100%;
+  height:100%;
+  position:relative;
+  overflow:hidden;
+}
+
+/* TRACK */
+.track{
+  position:absolute;
+  width:100%;
+  height:10px;
+  background:#3a2a1f;
+  bottom:120px;
+  box-shadow:0 0 15px rgba(0,0,0,0.6);
+}
+
+.track::before{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:3px;
+  top:-12px;
+  background:
+  repeating-linear-gradient(
+    to right,
+    #6b4f3a 0px,
+    #6b4f3a 40px,
+    transparent 40px,
+    transparent 70px
+  );
+}
+
+/* TRAIN */
+.train{
+  position:absolute;
+  bottom:130px;
+  display:flex;
+  align-items:flex-end;
+  gap:18px;
+
+  left:-2200px;
+
+  animation:trainEnter 7s cubic-bezier(.18,.89,.32,1.02) forwards;
+}
+
+@keyframes trainEnter{
+
+  0%{
+    left:-2200px;
+  }
+
+  100%{
+    left:50%;
+    transform:translateX(-50%);
+  }
+}
+
+/* ENGINE */
+.engine{
+  width:240px;
+  height:170px;
+  background:linear-gradient(145deg,#1f1f1f,#3b3b3b);
+  border-radius:20px 20px 10px 10px;
+  position:relative;
+
+  box-shadow:
+  0 15px 35px rgba(0,0,0,0.5),
+  inset 0 0 20px rgba(255,255,255,0.05);
+
+  transform:scaleX(-1);
+}
+
+.engine-top{
+  position:absolute;
+  width:120px;
+  height:90px;
+  background:#292929;
+  top:-70px;
+  right:20px;
+  border-radius:15px 15px 0 0;
+}
+
+.chimney{
+  position:absolute;
+  width:40px;
+  height:70px;
+  background:#111;
+  left:40px;
+  top:-60px;
+  border-radius:10px;
+}
+
+.light{
+  position:absolute;
+  width:38px;
+  height:38px;
+  background:#ffd34d;
+  border-radius:50%;
+  left:-18px;
+  top:60px;
+  box-shadow:0 0 25px #ffd34d;
+}
+
+.engine-text{
+  position:absolute;
+  bottom:25px;
+  width:100%;
+  text-align:center;
+  color:#f7d9a4;
+  letter-spacing:3px;
+  font-size:20px;
+  font-weight:bold;
+
+  transform:scaleX(-1);
+}
+
+/* WAGONS */
+.wagon{
+  width:220px;
+  height:150px;
+  background:linear-gradient(145deg,#2a2a2a,#404040);
+  border-radius:18px;
+  position:relative;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  box-shadow:
+  0 15px 35px rgba(0,0,0,0.5),
+  inset 0 0 15px rgba(255,255,255,0.05);
+}
+
+.wagon::before{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:8px;
+  background:#111;
+  left:-18px;
+  top:50%;
+  transform:translateY(-50%);
+}
+
+.wagon-card{
+  width:160px;
+  height:115px;
+  border-radius:15px;
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
+  transition:0.4s;
+  border:3px solid rgba(255,255,255,0.08);
+}
+
+.wagon-card:hover{
+  transform:translateY(-8px) scale(1.04);
+  box-shadow:0 0 25px rgba(255,215,150,0.4);
+}
+
+.wagon-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding-bottom:12px;
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+/* WHEELS */
+.wheel{
+  position:absolute;
+  width:42px;
+  height:42px;
+  background:#111;
+  border:5px solid #666;
+  border-radius:50%;
+  bottom:-24px;
+  animation:rotate 1s linear infinite;
+}
+
+.wheel::after{
+  content:"";
+  position:absolute;
+  width:8px;
+  height:8px;
+  background:#999;
+  border-radius:50%;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
+.wheel1{
+  left:25px;
+}
+
+.wheel2{
+  right:25px;
+}
+
+@keyframes rotate{
+  from{
+    transform:rotate(0deg);
+  }
+
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+/* SMOKE */
+.smoke{
+  position:absolute;
+  width:25px;
+  height:25px;
+  background:rgba(255,255,255,0.15);
+  border-radius:50%;
+  top:-70px;
+  left:48px;
+  animation:smoke 3s infinite;
+  filter:blur(2px);
+}
+
+.smoke:nth-child(2){
+  animation-delay:1s;
+}
+
+.smoke:nth-child(3){
+  animation-delay:2s;
+}
+
+@keyframes smoke{
+  0%{
+    transform:translateY(0) scale(0.5);
+    opacity:0.7;
+  }
+
+  100%{
+    transform:translateY(-120px) translateX(40px) scale(2);
+    opacity:0;
+  }
+}
+
+/* RESPONSIVE */
+@media(max-width:1400px){
+
+  .train{
+    transform:scale(0.8);
+  }
+}
+
+@media(max-width:1100px){
+  body{
+    overflow:auto;
+  }
+
+  .scene{
+    overflow:auto;
+  }
+
+  .train{
+    transform:scale(0.65);
+    transform-origin:left center;
+  }
+
+}
+  
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="track"></div>
+  <div class="train">
+
+    <!-- WAGON 1 -->
+    <div class="wagon">
+      <div class="wagon-card" data-link="https://tenisha5132.github.io/My_Portfolio/">
+        <img src="akhila.jpeg">
+        <div class="overlay">AKHILA</div>
+      </div>
+      <div class="wheel wheel1"></div>
+      <div class="wheel wheel2"></div>
+    </div>
+
+    <!-- WAGON 2 -->
+    <div class="wagon">
+      <div class="wagon-card" data-link="https://uthkarsh031.github.io/portfolio/">
+        <img src="utkarsh.jpeg">
+        <div class="overlay">UTHKARSH</div>
+      </div>
+      <div class="wheel wheel1"></div>
+      <div class="wheel wheel2"></div>
+    </div>
+
+    <!-- WAGON 3 -->
+    <div class="wagon">
+      <div class="wagon-card" data-link="https://jaggu-cpu-afk.github.io/portfolio/">
+        <img src="jaggu.jpeg">
+        <div class="overlay">JAGAPATHI</div>
+      </div>
+
+      <div class="wheel wheel1"></div>
+      <div class="wheel wheel2"></div>
+      
+    </div>
+    <!-- ENGINE -->
+    <div class="engine">
+      <div class="chimney"></div>
+      <div class="engine-top"></div>
+      <div class="light"></div>
+      <div class="smoke"></div>
+      <div class="smoke"></div>
+      <div class="smoke"></div>
+      <div class="engine-text">OUR TEAM</div>
+      <div class="wheel wheel1"></div>
+      <div class="wheel wheel2"></div>
+    </div>
+  </div>
+</div>
+<script>
+const cards = document.querySelectorAll('.wagon-card');
+cards.forEach(card=>{
+  card.addEventListener('click',()=>{
+    const link = card.getAttribute('data-link');
+    window.location.href = link;
+  });
+});
+
+/* STOP WHEELS AFTER TRAIN STOPS */
+setTimeout(()=>{
+  document.querySelectorAll('.wheel').forEach(wheel=>{
+    wheel.style.animationPlayState = 'paused';
+
+  });
+
+},7000);
+
+</script>
+</body>
+</html>
