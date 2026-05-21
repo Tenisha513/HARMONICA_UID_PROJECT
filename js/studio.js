@@ -49,12 +49,22 @@ if (window.currentProjectId) {
 const TOTAL_KEYS = 24;
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
+// Map flat names (Bb, Eb) to sharp names used on the grid
+const PITCH_ALIASES = { Bb: 'A#', Db: 'C#', Eb: 'D#', Gb: 'F#', Ab: 'G#' };
+
+function normalizePitch(pitch) {
+  if (!pitch || pitch.length < 2) return pitch;
+  const oct = pitch.match(/\d+$/)?.[0] ?? '';
+  const note = pitch.slice(0, pitch.length - oct.length);
+  return (PITCH_ALIASES[note] || note) + oct;
+}
+
 // 1. Audio Routing Architecture (Guarantees isolation to fix sound bleed)
 const masterBus = new Tone.Volume(0).toDestination();
 
-// Analysers for master visualizers
-const fftAnalyser = new Tone.Analyser("fft", 256);
-const waveformAnalyser = new Tone.Analyser("waveform", 256);
+// Analysers read from master bus in parallel (visualization tap)
+const fftAnalyser = new Tone.Analyser("fft", 512);
+const waveformAnalyser = new Tone.Analyser("waveform", 512);
 masterBus.connect(fftAnalyser);
 masterBus.connect(waveformAnalyser);
 
@@ -383,8 +393,8 @@ document.addEventListener("DOMContentLoaded", () => {
         shimmer.classList.remove('hidden');
         shimmer.classList.add('flex');
       }
-      setTimeout(() => {
-        applyTemplate(btn.dataset.template);
+      setTimeout(async () => {
+        await applyTemplate(btn.dataset.template);
         if (shimmer) {
           shimmer.classList.add('hidden');
           shimmer.classList.remove('flex');
@@ -726,8 +736,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Start the visualizer animation loop
+  // Start the visualizer animation loop (always runs)
   requestAnimationFrame(drawVisualizers);
+
+  // Re-size visualizer canvases when inspector panel becomes visible
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(() => {
+      ['freqCanvas', 'circleCanvas', 'waveCanvas'].forEach(id => {
+        const c = document.getElementById(id);
+        if (c) resizeCanvasToDisplaySize(c);
+      });
+    });
+    const audioMonitors = document.getElementById('audioMonitors');
+    if (audioMonitors) ro.observe(audioMonitors);
+  }
 });
 
 // Canvas roundRect helper
@@ -882,16 +904,16 @@ function drawGrid() {
     }
   }
 
-  // 3. Draw active track notes
-  const activeTrack = APP_STATE.tracks.find(t => t.id === APP_STATE.activeTrackId);
-  const baseColor = activeTrack ? activeTrack.color : '#ffc174';
-
+  // 3. Draw notes (active track bright, others dimmed)
   APP_STATE.notes.forEach(note => {
-    if (note.trackId !== APP_STATE.activeTrackId) return;
-    
-    const pitchIndex = getPitchIndex(note.pitch);
-    if (pitchIndex < 0) return;
+    const track = APP_STATE.tracks.find(t => t.id === note.trackId);
+    if (!track) return;
 
+    const pitchIndex = getPitchIndex(note.pitch);
+    if (pitchIndex < 0 || pitchIndex >= TOTAL_KEYS) return;
+
+    const isActiveTrack = note.trackId === APP_STATE.activeTrackId;
+    const baseColor = track.color;
     const y = (TOTAL_KEYS - 1 - pitchIndex) * c.rowHeight;
     const x = note.time * c.subdivisions * c.cellWidth;
     const width = note.duration * c.subdivisions * c.cellWidth;
@@ -899,8 +921,9 @@ function drawGrid() {
     const isSelected = note.id === APP_STATE.selectedNoteId;
 
     ctx.save();
+    ctx.globalAlpha = isActiveTrack ? 1 : 0.28;
     ctx.shadowColor = isSelected ? '#ffffff' : baseColor;
-    ctx.shadowBlur = isSelected ? 12 : 6;
+    ctx.shadowBlur = isSelected ? 12 : (isActiveTrack ? 6 : 2);
     
     const grad = ctx.createLinearGradient(x, y, x, y + height);
     if (isSelected) {
@@ -930,10 +953,11 @@ function drawGrid() {
 }
 
 function getPitchIndex(pitch) {
-  const note = pitch.slice(0, -1);
-  const oct = parseInt(pitch.slice(-1));
+  const normalized = normalizePitch(pitch);
+  const oct = parseInt(normalized.slice(-1), 10);
+  const note = normalized.slice(0, -1);
   const noteIdx = NOTE_NAMES.indexOf(note);
-  if (noteIdx === -1) return -1;
+  if (noteIdx === -1 || isNaN(oct)) return -1;
   return (oct - APP_STATE.gridConfig.minOctave) * 12 + noteIdx;
 }
 
@@ -1340,15 +1364,15 @@ const TEMPLATES = {
     title: 'Horror Ambience',
     bpm: 65,
     tracks: [
-      { id: 0, name: 'Drone',   color: '#534434', synthType: 'PolySynth', mute: false, solo: false, vol: -8, pan: 0,    effects: { Reverb: true,  Delay: true,  Chorus: true  } },
-      { id: 1, name: 'Texture', color: '#7fd0ff', synthType: 'AMSynth',   mute: false, solo: false, vol: -12, pan: -0.4, effects: { Reverb: true,  Delay: true,  Chorus: false } },
-      { id: 2, name: 'Hits',    color: '#ffb4ab', synthType: 'MonoSynth', mute: false, solo: false, vol: -4, pan: 0.3,  effects: { Reverb: true,  Delay: false, Chorus: false } },
+      { id: 0, name: 'Drone',   color: '#534434', synthType: 'PolySynth', mute: false, solo: false, vol: -6, pan: 0,    effects: { Reverb: true,  Delay: true,  Chorus: true  } },
+      { id: 1, name: 'Texture', color: '#7fd0ff', synthType: 'AMSynth',   mute: false, solo: false, vol: -10, pan: -0.3, effects: { Reverb: true,  Delay: true,  Chorus: false } },
+      { id: 2, name: 'Hits',    color: '#ffb4ab', synthType: 'MonoSynth', mute: false, solo: false, vol: -2, pan: 0.2,  effects: { Reverb: true,  Delay: false, Chorus: false } },
     ],
     notes: [
-      n(0,0,'C2',0,8,40), n(1,0,'C#2',0,8,35),
-      n(2,1,'F#3',1,0.5,50), n(3,1,'G3',3,0.5,45), n(4,1,'Bb3',5,0.5,48), n(5,1,'C4',7,0.5,42),
-      n(6,2,'C1',0,0.5,100), n(7,2,'C1',4,0.5,90), n(8,2,'C1',6,0.5,95),
-      n(9,0,'Eb2',4,4,38), n(10,0,'Bb2',4,4,36),
+      n(0,0,'C3',0,8,45), n(1,0,'D#3',0,8,40),
+      n(2,1,'F#4',1,0.5,55), n(3,1,'G4',3,0.5,50), n(4,1,'A#4',5,0.5,52), n(5,1,'C5',7,0.5,48),
+      n(6,2,'C3',0,0.5,110), n(7,2,'C3',4,0.5,100), n(8,2,'C3',6,0.5,105),
+      n(9,0,'D#3',4,4,42), n(10,0,'A#3',4,4,38),
     ]
   },
   piano: {
@@ -1399,9 +1423,13 @@ function disposeAllAudio() {
   APP_STATE.synths = {};
 }
 
-function applyTemplate(templateId) {
+async function applyTemplate(templateId) {
   const tpl = TEMPLATES[templateId];
   if (!tpl) return;
+
+  if (Tone.context.state !== 'running') {
+    await Tone.start();
+  }
 
   if (APP_STATE.isPlaying) stopPlay();
 
@@ -1431,7 +1459,15 @@ function applyTemplate(templateId) {
   renderTracks();
   drawGrid();
   updatePropertiesPanel();
-  showToast(`Loaded ${tpl.name} template`);
+
+  const statusIndicator = document.getElementById("engineStatus");
+  if (statusIndicator) {
+    statusIndicator.classList.remove("bg-primary", "animate-pulse");
+    statusIndicator.classList.add("bg-[#5eff8a]");
+    statusIndicator.title = "Audio Engine Connected";
+  }
+
+  showToast(`Loaded ${tpl.name} — click tracks to view each part`);
 }
 
 // 6. Mood / Vibe Arrange Synthesis Engine
@@ -1657,6 +1693,7 @@ function drawVisualizers() {
     const ctx = freqCanvas.getContext("2d");
     const w = freqCanvas.width;
     const h = freqCanvas.height;
+    if (w > 0 && h > 0) {
     ctx.fillStyle = "#0e0e10";
     ctx.fillRect(0, 0, w, h);
 
@@ -1701,30 +1738,37 @@ function drawVisualizers() {
         ctx.fillRect(x + gap, y - 1, barWidth - gap * 2, 2);
       }
     }
+    }
   }
 
-  // 2. Circular Spectrum — radiating spikes, slow spin, teal left / beige right
+  // 2. Circular Spectrum — beat pump in/out (synced to BPM), teal left / beige right
   if (circleCanvas) {
     resizeCanvasToDisplaySize(circleCanvas);
     const ctx = circleCanvas.getContext("2d");
     const w = circleCanvas.width;
     const h = circleCanvas.height;
+    if (w > 0 && h > 0) {
     ctx.fillStyle = "#0e0e10";
     ctx.fillRect(0, 0, w, h);
 
     const values = fftAnalyser.getValue();
     const cx = w / 2;
     const cy = h / 2;
-    const baseR = Math.min(w, h) * 0.2;
-    const maxSpike = Math.min(w, h) * 0.28;
+    const baseR = Math.min(w, h) * 0.18;
+    const maxSpike = Math.min(w, h) * 0.3;
     const numPoints = VIS_STATE.circleRadii.length;
-    const spin = now * 0.35;
 
-    const ringPulse = 0.2 + Math.sin(now * 2.2) * 0.06;
+    // Beat pump: expand on beat, contract between (forth and back)
+    const bpm = APP_STATE.bpm || 120;
+    const beatHz = bpm / 60;
+    const beatPhase = now * beatHz * Math.PI * 2;
+    const beatPump = 0.42 + 0.58 * Math.pow(Math.max(0, Math.sin(beatPhase)), 1.4);
+
+    const ringPulse = 0.15 + beatPump * 0.25;
     ctx.beginPath();
-    ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
-    const ringGrad = ctx.createRadialGradient(cx, cy, baseR * 0.5, cx, cy, baseR);
-    ringGrad.addColorStop(0, visGradientColor(0, 0.05));
+    ctx.arc(cx, cy, baseR * (0.92 + beatPump * 0.08), 0, Math.PI * 2);
+    const ringGrad = ctx.createRadialGradient(cx, cy, baseR * 0.4, cx, cy, baseR);
+    ringGrad.addColorStop(0, visGradientColor(0, 0.06));
     ringGrad.addColorStop(1, visGradientColor(0.5, ringPulse));
     ctx.strokeStyle = ringGrad;
     ctx.lineWidth = 1.5;
@@ -1733,18 +1777,17 @@ function drawVisualizers() {
     let fftEnergy = 0;
     const angles = [];
     for (let i = 0; i < numPoints; i++) {
-      const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2 + spin * 0.15;
+      const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
       angles.push(angle);
       const valIdx = Math.floor((i / numPoints) * values.length);
       const db = values[valIdx];
       const fftNorm = isFinite(db) ? Math.max(0, (db + 85) / 85) : 0;
       fftEnergy += fftNorm;
 
-      const idlePhase = (i / numPoints) * Math.PI * 2 + spin;
-      const idleLen = 0.14 + Math.sin(now * 1.6 + idlePhase) * 0.07
-                    + Math.sin(now * 0.5 + idlePhase * 2) * 0.04;
-      const targetLen = baseR + Math.max(idleLen, fftNorm * 0.85) * maxSpike;
-      VIS_STATE.circleRadii[i] = visLerp(VIS_STATE.circleRadii[i], targetLen, fftEnergy > 0.06 ? 0.26 : 0.12);
+      const wobble = Math.sin(now * 3 + i * 0.4) * 0.03;
+      const spikeBase = 0.12 + beatPump * 0.22 + wobble;
+      const targetLen = baseR + Math.max(spikeBase, fftNorm * 0.9 * beatPump) * maxSpike;
+      VIS_STATE.circleRadii[i] = visLerp(VIS_STATE.circleRadii[i], targetLen, fftEnergy > 0.06 ? 0.32 : 0.18);
     }
 
     ctx.beginPath();
@@ -1781,6 +1824,7 @@ function drawVisualizers() {
       ctx.lineCap = "round";
       ctx.stroke();
     }
+    }
   }
 
   // 3. Waveform Monitor — flowing gradient wave, drifts when idle
@@ -1789,6 +1833,7 @@ function drawVisualizers() {
     const ctx = waveCanvas.getContext("2d");
     const w = waveCanvas.width;
     const h = waveCanvas.height;
+    if (w > 0 && h > 0) {
     const centerY = h / 2;
 
     ctx.fillStyle = "#0e0e10";
@@ -1818,5 +1863,6 @@ function drawVisualizers() {
       amplitudeScale: amp < 0.02 ? 0.36 : 0.4,
       lineWidth: 1.75
     });
+    }
   }
 }
