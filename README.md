@@ -180,4 +180,4 @@ uid project/
 
 **Harmonica** — Orchestrate your sound.
 
-A Tip: u can delete a 
+A Tip: u can delete a note by right clicking on it
