@@ -1,0 +1,208 @@
+/* Main Application Styles & Custom Tactile Components */
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-family-sans);
+}
+
+/* Material Symbols Variable Adjustments */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Custom Scrollbar for DAW grid and lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-surface-container-lowest); 
+  border-left: 1px solid rgba(83, 68, 52, 0.2);
+  border-top: 1px solid rgba(83, 68, 52, 0.2);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-surface-container-highest); 
+  border-radius: 6px;
+  border: 3px solid var(--color-surface-container-lowest);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline-variant); 
+}
+
+/* Hardware Layout Inset & Panel Effects (Tactile Modernist) */
+.hardware-inset {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.milled-panel {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 6px rgba(0,0,0,0.3);
+  border: 1px solid var(--color-outline-variant);
+}
+
+.hardware-btn {
+  background: linear-gradient(180deg, var(--color-surface-container-high) 0%, var(--color-surface-container) 100%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 2px 4px rgba(0,0,0,0.4);
+  border: 1px solid var(--color-outline-variant);
+  color: var(--color-on-surface);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hardware-btn:hover {
+  background: linear-gradient(180deg, var(--color-surface-container-highest) 0%, var(--color-surface-container-high) 100%);
+  border-color: var(--color-outline);
+}
+
+.hardware-btn:active {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  transform: translateY(1px);
+}
+
+.hardware-btn-primary {
+  background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-primary-fixed-dim) 100%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0,0,0,0.4);
+  border: 1px solid var(--color-on-primary-fixed);
+  color: var(--color-on-primary);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hardware-btn-primary:hover {
+  background: linear-gradient(180deg, var(--color-primary-fixed) 0%, var(--color-primary) 100%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.hardware-btn-primary:active {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  transform: translateY(1px);
+}
+
+/* Audio Signal/LED Glow animations */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 2px rgba(255, 180, 171, 0.4); }
+  50% { opacity: 1; box-shadow: 0 0 8px rgba(255, 180, 171, 0.8); }
+}
+
+.led-indicator-active {
+  animation: pulseGlow 1.5s infinite;
+}
+
+/* Loading shimmer overlay */
+.loading-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 193, 116, 0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  pointer-events: none;
+  display: none;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Fix for light option tags in dark mode */
+option {
+  background-color: var(--color-surface-container);
+  color: var(--color-on-surface);
+}
+
+/* --- Media Query Breakpoints (Responsiveness Cases) --- */
+
+/* Case 1: Mobile Devices (Small screens) */
+@media screen and (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+  .milled-panel {
+    padding: 1rem !important;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* Case 2: Tablets (Medium screens) */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+  .hardware-btn, .hardware-btn-primary {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Case 3: Laptops / Desktop (Large screens) */
+@media screen and (min-width: 769px) and (max-width: 1280px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+/* Case 4: Ultra-wides (Extra large screens) */
+@media screen and (min-width: 1281px) {
+  body {
+    font-size: 18px; /* Slightly larger base font for high res */
+  }
+  .hardware-inset {
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+}
+
+/* Virtual Keyboard active state styles */
+.white-key.active-key {
+  background: linear-gradient(to bottom, #cbd5e1, #94a3b8) !important;
+  border-top: 3px solid #64748b !important;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.3) !important;
+}
+.active-key {
+  background: linear-gradient(to bottom, #020617, #0f172a) !important;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.6) !important;
+}
+
+/* Studio footer — stay inside viewport */
+.studio-footer {
+  flex-shrink: 0;
+}
+.studio-footer .ai-mood-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-outline-variant) transparent;
+}
+.studio-footer .ai-mood-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.studio-footer .ai-mood-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 3px;
+}
+.ai-mood-panel .mood-pill {
+  min-width: 4.25rem;
+}
+.ai-mood-panel .mood-pill.bg-primary {
+  box-shadow: 0 0 10px rgba(255, 193, 116, 0.2);
+}
+.ai-mood-scroll-hint .material-symbols-outlined {
+  animation: scroll-hint-bounce 1.6s ease-in-out infinite;
+}
+@keyframes scroll-hint-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(4px); opacity: 1; }
+}
+
+/* Audio monitor cards — subtle live glow */
+#audioMonitors canvas {
+  display: block;
+}
+#audioMonitors > div:has(canvas) {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+#audioMonitors > div:has(canvas):hover {
+  border-color: rgba(143, 213, 255, 0.25);
+  box-shadow: inset 0 0 24px rgba(143, 213, 255, 0.06), 0 0 12px rgba(255, 193, 116, 0.08);
+}
+
