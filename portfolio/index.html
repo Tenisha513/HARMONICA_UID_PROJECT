@@ -32,6 +32,7 @@ body{
 }
 
 /* TRACK */
+
 .track{
   position:absolute;
   width:100%;
@@ -58,6 +59,7 @@ body{
 }
 
 /* TRAIN */
+
 .train{
   position:absolute;
   bottom:130px;
@@ -83,6 +85,7 @@ body{
 }
 
 /* ENGINE */
+
 .engine{
   width:240px;
   height:170px;
@@ -142,6 +145,7 @@ body{
 }
 
 /* WAGONS */
+
 .wagon{
   width:220px;
   height:150px;
@@ -206,6 +210,7 @@ body{
 }
 
 /* WHEELS */
+
 .wheel{
   position:absolute;
   width:42px;
@@ -248,6 +253,7 @@ body{
 }
 
 /* SMOKE */
+
 .smoke{
   position:absolute;
   width:25px;
@@ -269,6 +275,7 @@ body{
 }
 
 @keyframes smoke{
+
   0%{
     transform:translateY(0) scale(0.5);
     opacity:0.7;
@@ -281,14 +288,17 @@ body{
 }
 
 /* RESPONSIVE */
+
 @media(max-width:1400px){
 
   .train{
     transform:scale(0.8);
   }
+
 }
 
 @media(max-width:1100px){
+
   body{
     overflow:auto;
   }
@@ -303,71 +313,114 @@ body{
   }
 
 }
-  
+
 </style>
 </head>
+
 <body>
+
 <div class="scene">
+
   <div class="track"></div>
+
   <div class="train">
 
     <!-- WAGON 1 -->
+
     <div class="wagon">
+
       <div class="wagon-card" data-link="https://tenisha5132.github.io/My_Portfolio/">
+
         <img src="akhila.jpeg">
+
         <div class="overlay">AKHILA</div>
+
       </div>
+
       <div class="wheel wheel1"></div>
       <div class="wheel wheel2"></div>
+
     </div>
 
     <!-- WAGON 2 -->
+
     <div class="wagon">
+
       <div class="wagon-card" data-link="https://uthkarsh031.github.io/portfolio/">
+
         <img src="utkarsh.jpeg">
+
         <div class="overlay">UTHKARSH</div>
+
       </div>
+
       <div class="wheel wheel1"></div>
       <div class="wheel wheel2"></div>
+
     </div>
 
     <!-- WAGON 3 -->
+
     <div class="wagon">
+
       <div class="wagon-card" data-link="https://jaggu-cpu-afk.github.io/portfolio/">
+
         <img src="jaggu.jpeg">
+
         <div class="overlay">JAGAPATHI</div>
+
       </div>
 
       <div class="wheel wheel1"></div>
       <div class="wheel wheel2"></div>
-      
+
     </div>
+
     <!-- ENGINE -->
+
     <div class="engine">
+
       <div class="chimney"></div>
       <div class="engine-top"></div>
       <div class="light"></div>
+
       <div class="smoke"></div>
       <div class="smoke"></div>
       <div class="smoke"></div>
+
       <div class="engine-text">OUR TEAM</div>
+
       <div class="wheel wheel1"></div>
       <div class="wheel wheel2"></div>
+
     </div>
+
   </div>
+
 </div>
+
 <script>
+
 const cards = document.querySelectorAll('.wagon-card');
+
 cards.forEach(card=>{
+
   card.addEventListener('click',()=>{
+
     const link = card.getAttribute('data-link');
+
     window.location.href = link;
+
   });
+
 });
 
 /* STOP WHEELS AFTER TRAIN STOPS */
+
 setTimeout(()=>{
+
   document.querySelectorAll('.wheel').forEach(wheel=>{
+
     wheel.style.animationPlayState = 'paused';
 
   });
@@ -375,5 +428,6 @@ setTimeout(()=>{
 },7000);
 
 </script>
+
 </body>
 </html>
