@@ -2,7 +2,7 @@
 
 A browser-based music studio you can open without installing anything. Compose on a piano roll, mix tracks, try starter templates, and let the mood generator sketch ideas for you — all in a dark, studio-style interface.
 
-Built as a UID (User Interface Design) project. Everything runs in the browser: no server, no account database, no cloud sync.
+Built as a UID (User Interface Design) project. Everything runs in the browser.
 
 ---
 
@@ -28,20 +28,8 @@ There is also a separate `portfolio/index.html` train animation page if you want
 
 ---
 
-## Quick start
-
-From the project folder:
-
-```bash
-cd "/home/teni/Downloads/uid project(1)/uid project"
-python3 -m http.server 8080
-```
-
-Open **http://localhost:8080/index.html**
-
-If port 8080 is busy, try `8000` or any free port.
-
-You can also open `index.html` directly in the browser, but audio and canvas layouts work more reliably over `http://localhost`.
+## Live at:
+> https://tenisha5132.github.io/HARMONICA_UID_PROJECT/studio.html
 
 **Demo login**
 
@@ -190,20 +178,6 @@ uid project/
 
 ---
 
-## Good to know (limitations)
-
-- Login, share, and “AI” are UI demos — nothing hits a real server  
-- Export is JSON only, not WAV or MP3  
-- Mood generation is procedural, not ChatGPT-style AI  
-- Works best in Chrome, Firefox, Edge, or Safari  
-- One browser, one machine — projects do not sync elsewhere  
-
----
-
-## License
-
-Educational / UID coursework. Ask the authors before reusing or publishing publicly.
-
----
-
 **Harmonica** — Orchestrate your sound.
+
+A Tip: u can delete a 
