@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Harmonica - Authentication</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Decoupled Harmonica Theme Configuration & Stylesheets -->
+    <script src="js/tailwind-config.js"></script>
+    <link href="css/harmonica-ds.css" rel="stylesheet"/>
+    <link href="css/main.css" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-background antialiased h-screen w-full flex overflow-hidden">
+    <!-- Left Pane: Branding & Visual Context (Hidden on mobile) -->
+    <div class="hidden lg:flex lg:w-1/2 relative bg-surface-container-lowest flex-col justify-end p-16">
+        <!-- Tactile Studio Background -->
+        <div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity" 
+             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDmbjLbE_vHBOdGrr9_aaHwLPThDzKtoYUHfe8ls36xevIr6ORtO2WiURFEM-YwLcx7Fsg6BpjEyOGKuyi2urgiJhFbQTUrEAcViBbHKgdXt8QcLKVXNgSs8unk5Gw-HfJgTtnEzctXX6s0OP5tyj2aj7NzJKIN-pBRkkpIDSCg11E1RwE44hTqMoyGV3C5WQVX967LStPqAIH_aVaYOhI5EzH-VbZntY_um2FP-ijtBfJGurLhv3xQ4YPQ1ikcmQycHGE7ji17Nc8N');">
+        </div>
+        <!-- Deep Tonal Overlay for Text Legibility -->
+        <div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/80 to-transparent"></div>
+        <!-- Branding Content -->
+        <div class="relative z-10 flex flex-col gap-4">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+                <h1 class="font-display-lg text-display-lg text-on-surface">Harmonica</h1>
+            </div>
+            <p class="font-headline-md text-headline-md text-on-surface-variant max-w-md leading-relaxed">
+                Orchestrate your sound.<br/>
+                <span class="text-on-surface opacity-80 font-body-md text-body-md">The intersection of high-end analog logic and advanced AI synthesis.</span>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Right Pane: Authentication Form -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center items-center px-8 sm:px-16 xl:px-32 bg-surface relative z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] border-l border-outline-variant/10">
+        <div class="w-full max-w-[400px]">
+            <!-- Mobile Brand Header (Visible only when left pane is hidden) -->
+            <div class="lg:hidden flex items-center justify-center gap-2 mb-12">
+                <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+                <h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Harmonica</h1>
+            </div>
+            <!-- Form Header -->
+            <div class="mb-10 text-center lg:text-left">
+                <h2 class="font-headline-md text-headline-md text-on-surface mb-2">Initialize Session</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant">Access your studio workspace.</p>
+            </div>
+             <!-- Auth Form -->
+             <form class="flex flex-col gap-6" id="loginForm">
+                 <!-- Email Field -->
+                 <div class="flex flex-col gap-2">
+                     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest pl-1" for="email">Signal ID (Email)</label>
+                     <input class="w-full bg-surface-container-low hardware-inset border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface font-body-md text-body-md p-3 rounded transition-colors placeholder:text-on-surface-variant/30 outline-none" id="email" placeholder="producer@studio.local" required="" type="email" value="producer@studio.local"/>
+                     <span id="emailError" class="text-error font-label-mono text-[11px] pl-1 hidden flex items-center gap-1">
+                         <span class="material-symbols-outlined text-[14px]">error</span> Enter a valid email format.
+                     </span>
+                 </div>
+                 <!-- Password Field -->
+                 <div class="flex flex-col gap-2">
+                     <div class="flex justify-between items-end pl-1 pr-1">
+                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest" for="password">Access Key</label>
+                         <a class="font-label-mono text-label-mono text-primary hover:text-surface-tint transition-colors" href="#">Recover?</a>
+                     </div>
+                     <div class="relative">
+                         <input class="w-full bg-surface-container-low hardware-inset border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-surface font-body-md text-body-md p-3 rounded transition-colors placeholder:text-on-surface-variant/30 outline-none pr-10" id="password" placeholder="••••••••" required="" type="password" value="Harmonica_2026!"/>
+                         <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors" type="button" id="togglePassword">
+                             <span class="material-symbols-outlined text-[20px]" id="visibilityIcon">visibility</span>
+                         </button>
+                     </div>
+                     <span id="passwordError" class="text-error font-label-mono text-[11px] pl-1 hidden flex items-center gap-1">
+                         <span class="material-symbols-outlined text-[14px]">error</span> Must be 8+ chars (1 upper, 1 lower, 1 digit, 1 symbol).
+                     </span>
+                 </div>
+                 <!-- Primary Submit Action -->
+                 <button class="w-full mt-2 bg-primary text-on-primary font-headline-sm text-headline-sm py-3 px-4 rounded hardware-button transition-all flex items-center justify-center gap-2 group" type="submit">
+                     <span>Engage</span>
+                     <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+                 </button>
+             </form>
+             
+             <!-- Separation Logic -->
+             <div class="my-8 flex items-center gap-4">
+                 <div class="flex-1 h-px bg-outline-variant opacity-50"></div>
+                 <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">External Route</span>
+                 <div class="flex-1 h-px bg-outline-variant opacity-50"></div>
+             </div>
+             
+             <!-- Secondary Actions (Social) -->
+             <div class="grid grid-cols-2 gap-4">
+                 <button class="flex items-center justify-center gap-2 bg-surface-variant hover:bg-surface-container-highest border border-outline-variant text-on-surface font-body-md text-body-md py-3 rounded transition-colors hardware-button" type="button" onclick="window.location.href='dashboard.html'">
+                     <span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                     Apple ID
+                 </button>
+                 <button class="flex items-center justify-center gap-2 bg-surface-variant hover:bg-surface-container-highest border border-outline-variant text-on-surface font-body-md text-body-md py-3 rounded transition-colors hardware-button" type="button" onclick="window.location.href='dashboard.html'">
+                     <span class="material-symbols-outlined text-[20px]">token</span>
+                     Google
+                 </button>
+             </div>
+             <!-- Footer Link -->
+             <div class="mt-12 text-center flex flex-col gap-2">
+                 <p class="font-body-md text-body-md text-on-surface-variant">
+                     No active session profile? 
+                     <a class="text-primary hover:text-surface-tint font-bold transition-colors ml-1 border-b border-primary/30 hover:border-surface-tint" href="#">Request Access</a>
+                 </p>
+                 <p class="font-body-md text-body-md text-on-surface-variant">
+                     Want to meet the developers? 
+                     <a class="text-secondary hover:text-surface-tint font-bold transition-colors ml-1 border-b border-secondary/30 hover:border-surface-tint" href="about.html">About Us</a>
+                 </p>
+             </div>
+        </div>
+    </div>
+    
+    <!-- Interactions Script -->
+    <script src="js/auth.js"></script>
+</body>
+</html>

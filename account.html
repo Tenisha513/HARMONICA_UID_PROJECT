@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Harmonica - Account Settings</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Decoupled Harmonica Theme Configuration & Stylesheets -->
+    <script src="js/tailwind-config.js"></script>
+    <link href="css/harmonica-ds.css" rel="stylesheet"/>
+    <link href="css/main.css" rel="stylesheet"/>
+</head>
+<body class="font-body-md text-body-md min-h-screen overflow-x-hidden selection:bg-primary selection:text-on-primary bg-background text-on-background">
+    <!-- TopNavBar Component -->
+    <nav aria-label="Top Navigation" class="fixed top-0 flex justify-between items-center w-full px-gutter h-14 z-50 bg-surface shadow-sm border-b border-outline-variant/10">
+        <div class="flex items-center gap-6">
+            <!-- Brand -->
+            <div class="font-headline-md text-headline-md font-bold text-primary tracking-tight cursor-pointer" onclick="window.location.href='dashboard.html'">
+                Harmonica
+            </div>
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center gap-4 ml-4">
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">File</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Edit</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">View</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Project</a>
+            </div>
+        </div>
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-md mx-6 hidden lg:block">
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">search</span>
+                <input class="w-full h-8 pl-9 pr-3 bg-surface-container-lowest border border-outline-variant/30 rounded text-on-surface font-label-mono text-label-mono inset-shadow-custom focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container transition-all placeholder:text-on-surface-variant/50" placeholder="Global Search..." type="text" id="globalSearchInput"/>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Text Actions -->
+            <button class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200">Export</button>
+            <button class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200">Share</button>
+            <div class="w-px h-4 bg-outline-variant/50 mx-2"></div>
+            <!-- Icon Actions -->
+            <button aria-label="settings" class="text-on-surface-variant hover:text-primary transition-colors duration-200 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant" onclick="window.location.href='account.html'">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+            </button>
+            <button aria-label="notifications" class="text-on-surface-variant hover:text-primary transition-colors duration-200 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant relative">
+                <span class="material-symbols-outlined text-[20px]">notifications</span>
+                <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full"></span>
+            </button>
+            <!-- Profile -->
+            <div class="w-8 h-8 rounded-full bg-surface-variant ml-2 border border-outline-variant/50 overflow-hidden cursor-pointer hover:border-primary transition-colors" onclick="window.location.href='account.html'">
+                <div class="w-full h-full bg-secondary-container/20 flex items-center justify-center text-primary font-label-caps text-label-caps">US</div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Layout Container -->
+    <div class="flex pt-14 pb-16 md:pb-0 min-h-screen">
+        <!-- SideNavBar / BottomNavBar -->
+        <aside class="flex fixed bottom-0 left-0 right-0 md:top-14 md:bottom-0 md:right-auto flex-row md:flex-col w-full md:w-sidebar-width z-40 bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-md border-t md:border-t-0 md:border-r border-surface-container-high">
+            <!-- Header (Desktop Only) -->
+            <div class="hidden md:flex p-gutter border-b border-surface-container-high/50 items-center gap-3">
+                <div class="w-10 h-10 rounded bg-surface-container-lowest inset-shadow-custom flex items-center justify-center border border-outline-variant/30">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">album</span>
+                </div>
+                <div>
+                    <h2 class="font-headline-sm text-headline-sm text-primary">Project Alpha</h2>
+                    <p class="font-label-mono text-label-mono text-on-surface-variant/70 mt-0.5">Mastering Phase</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <div class="flex-1 py-2 md:py-4 flex flex-row md:flex-col gap-1 px-2 justify-around md:justify-start">
+                <!-- Studio -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="studio.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">equalizer</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Studio</span>
+                </a>
+                <!-- Tracks -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="dashboard.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors" style="font-variation-settings: 'FILL' 0;">queue_music</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Tracks</span>
+                </a>
+                <!-- Account -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-primary border-t-2 md:border-t-0 md:border-l-4 border-primary bg-surface-variant font-bold md:translate-x-1 duration-150 relative" href="account.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px]" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md">Account</span>
+                </a>
+                <!-- About -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="about.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">info</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">About</span>
+                </a>
+            </div>
+            <!-- Footer Section (Desktop Only) -->
+            <div class="hidden md:flex p-4 border-t border-surface-container-high/50 flex-col gap-2">
+                <button class="w-full hardware-btn-primary rounded py-2 px-4 flex items-center justify-center gap-2 transition-all font-body-md text-body-md font-semibold" onclick="window.location.href='studio.html'">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    New Project
+                </button>
+            </div>
+        </aside>
+    
+    <!-- Main Content Stage -->
+    <main class="flex-1 ml-0 md:ml-sidebar-width p-margin-mobile md:p-margin-desktop flex flex-col gap-gutter max-w-6xl w-full">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+                <h1 class="font-display-md text-display-md text-on-surface mb-2 tracking-tight">Account Settings</h1>
+                <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Manage your signal ID, active sessions, and hardware integrations.</p>
+            </div>
+        </div>
+        
+        <!-- Live Notifications Area for simulated actions -->
+        <div id="alertArea" class="hidden mb-4 p-4 rounded bg-surface-container border border-primary/20 text-primary font-label-mono text-label-mono flex items-center justify-between shadow-md transition-all">
+            <span id="alertMessage">Core synced successfully.</span>
+            <button class="text-on-surface-variant hover:text-primary text-[20px]" onclick="document.getElementById('alertArea').classList.add('hidden')">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+            <!-- Column 1: Profile & Plan -->
+            <div class="flex flex-col gap-gutter lg:col-span-2">
+                <!-- Profile Settings Card -->
+                <section class="bg-surface-container rounded-xl p-6 milled-panel" id="profileCard">
+                    <div class="flex items-center justify-between mb-6 border-b border-surface-container-highest pb-4">
+                        <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">person</span> Profile Settings
+                        </h2>
+                        <button class="text-primary hover:text-surface-tint font-label-mono text-label-mono transition-colors" id="editProfileBtn">Edit</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="font-label-caps text-label-caps text-on-surface-variant">Display Name</label>
+                            <input class="bg-surface-container-lowest text-on-surface border-none rounded px-3 py-2 font-body-md text-body-md inset-field focus:ring-1 focus:ring-secondary-container outline-none read-only:opacity-80" id="profileNameInput" readonly="" type="text" value="Producer_X"/>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-label-caps text-label-caps text-on-surface-variant">Email Address</label>
+                            <input class="bg-surface-container-lowest text-on-surface border-none rounded px-3 py-2 font-body-md text-body-md inset-field focus:ring-1 focus:ring-secondary-container outline-none read-only:opacity-80" id="profileEmailInput" readonly="" type="email" value="producer.x@studio.com"/>
+                        </div>
+                    </div>
+                </section>
+                <!-- Storage & Usage Panel -->
+                <section class="bg-surface-container rounded-xl p-6 milled-panel">
+                    <h2 class="font-headline-sm text-headline-sm text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-tertiary">cloud</span> Storage Usage
+                    </h2>
+                    <div class="mb-2 flex justify-between text-label-mono font-label-mono text-on-surface-variant">
+                        <span>42GB used</span>
+                        <span>100GB total</span>
+                    </div>
+                    <div class="h-2 w-full bg-surface-container-lowest rounded-full overflow-hidden inset-field mb-4">
+                        <div class="h-full bg-primary" style="width: 42%;"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-surface-container-highest rounded p-3">
+                            <div class="font-headline-sm text-headline-sm text-on-surface">120</div>
+                            <div class="font-label-caps text-label-caps text-on-surface-variant">Projects</div>
+                        </div>
+                        <div class="bg-surface-container-highest rounded p-3">
+                            <div class="font-headline-sm text-headline-sm text-on-surface">1,402</div>
+                            <div class="font-label-caps text-label-caps text-on-surface-variant">Stems</div>
+                        </div>
+                        <div class="bg-surface-container-highest rounded p-3">
+                            <div class="font-headline-sm text-headline-sm text-on-surface">85</div>
+                            <div class="font-label-caps text-label-caps text-on-surface-variant">Presets</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Column 2: Subscription & Security -->
+            <div class="flex flex-col gap-gutter">
+                <!-- Plan Details Card -->
+                <section class="bg-surface-container-high rounded-xl p-6 milled-panel border border-surface-container-highest relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-full pointer-events-none"></div>
+                    <h2 class="font-headline-md text-headline-md text-primary mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined">workspace_premium</span> Pro Plan
+                    </h2>
+                    <p class="text-on-surface-variant font-label-mono text-label-mono mb-6">Active subscription</p>
+                    <ul class="flex flex-col gap-3 mb-6 font-body-md text-body-md text-on-surface">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">check</span> Unlimited Tracks</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">check</span> High-Res Export</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">check</span> Priority AI Processing</li>
+                    </ul>
+                    <button class="w-full bg-surface-container-lowest text-on-surface py-2 rounded font-label-caps text-label-caps hardware-btn hover:text-primary transition-colors">Manage Plan</button>
+                </section>
+                <!-- Security Settings -->
+                <section class="bg-surface-container rounded-xl p-6 milled-panel">
+                    <h2 class="font-headline-sm text-headline-sm text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-error">lock</span> Security
+                    </h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between bg-surface-container-highest p-3 rounded">
+                            <div>
+                                <div class="font-body-md text-body-md text-on-surface">Two-Factor Auth</div>
+                                <div class="font-label-mono text-label-mono text-on-surface-variant" id="tfaStatus">Disabled</div>
+                            </div>
+                            <button class="text-primary font-label-caps text-label-caps hover:underline" id="tfaBtn">Enable</button>
+                        </div>
+                        <div class="flex items-center justify-between bg-surface-container-highest p-3 rounded">
+                            <div>
+                                <div class="font-body-md text-body-md text-on-surface">Password</div>
+                                <div class="font-label-mono text-label-mono text-on-surface-variant">Last changed 30d ago</div>
+                            </div>
+                            <button class="text-on-surface font-label-caps text-label-caps hover:text-primary" id="updatePasswordBtn">Update</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Behaviors Script -->
+    <script src="js/account.js"></script>
+</body>
+</html>

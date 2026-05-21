@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>About Us - Harmonica</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Decoupled Harmonica Theme Configuration & Stylesheets -->
+    <script src="js/tailwind-config.js"></script>
+    <link href="css/harmonica-ds.css" rel="stylesheet"/>
+    <link href="css/main.css" rel="stylesheet"/>
+    
+    <style>
+        /* Custom animations for the team express layout */
+        @keyframes reel-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .cassette-reel {
+            animation: reel-spin 3s linear infinite;
+        }
+        
+        .train-stopped .cassette-reel {
+            animation-play-state: paused;
+        }
+
+        .wagon-card:hover .cassette-reel {
+            animation: reel-spin 1s linear infinite;
+            animation-play-state: running !important;
+        }
+
+        /* Soundwave animation for track */
+        @keyframes signal-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .glow-track {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0) 0%, rgba(59, 130, 246, 0.8) 50%, rgba(59, 130, 246, 0) 100%);
+            background-size: 200% 100%;
+            animation: signal-flow 4s linear infinite;
+        }
+
+        /* Float animation for musical notes smoke */
+        @keyframes note-float {
+            0% {
+                transform: translateY(0) scale(0.6) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-80px) translateX(30px) scale(1.3) rotate(20deg);
+                opacity: 0;
+            }
+        }
+
+        .synth-smoke-note {
+            position: absolute;
+            animation: note-float 4s infinite linear;
+            opacity: 0;
+        }
+
+        /* Train entrance animation */
+        @keyframes deck-slide-in {
+            0% {
+                transform: translateX(-150px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .deck-entrance {
+            animation: deck-slide-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        /* Custom styling for custom browser scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Continuous chugging locomotion wobble */
+        @keyframes train-chug {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .chugging {
+            animation: train-chug 0.7s ease-in-out infinite;
+        }
+        .train-stopped .chugging {
+            animation-play-state: paused !important;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md min-h-screen overflow-x-hidden selection:bg-primary selection:text-on-primary bg-background text-on-background">
+    <!-- TopNavBar Component -->
+    <nav aria-label="Top Navigation" class="fixed top-0 flex justify-between items-center w-full px-gutter h-14 z-50 bg-surface shadow-sm border-b border-outline-variant/10">
+        <div class="flex items-center gap-6">
+            <!-- Brand -->
+            <div class="font-headline-md text-headline-md font-bold text-primary tracking-tight cursor-pointer" onclick="window.location.href='dashboard.html'">
+                Harmonica
+            </div>
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center gap-4 ml-4">
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">File</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Edit</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">View</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Project</a>
+            </div>
+        </div>
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-md mx-6 hidden lg:block">
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">search</span>
+                <input class="w-full h-8 pl-9 pr-3 bg-surface-container-lowest border border-outline-variant/30 rounded text-on-surface font-label-mono text-label-mono inset-shadow-custom focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container transition-all placeholder:text-on-surface-variant/50" placeholder="Global Search..." type="text" id="globalSearchInput"/>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Text Actions -->
+            <button class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200">Export</button>
+            <button class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200">Share</button>
+            <div class="w-px h-4 bg-outline-variant/50 mx-2"></div>
+            <!-- Icon Actions -->
+            <button aria-label="settings" class="text-on-surface-variant hover:text-primary transition-colors duration-200 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant" onclick="window.location.href='account.html'">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+            </button>
+            <button aria-label="notifications" class="text-on-surface-variant hover:text-primary transition-colors duration-200 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant relative">
+                <span class="material-symbols-outlined text-[20px]">notifications</span>
+                <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full"></span>
+            </button>
+            <!-- Profile -->
+            <div class="w-8 h-8 rounded-full bg-surface-variant ml-2 border border-outline-variant/50 overflow-hidden cursor-pointer hover:border-primary transition-colors" onclick="window.location.href='account.html'">
+                <div class="w-full h-full bg-secondary-container/20 flex items-center justify-center text-primary font-label-caps text-label-caps">US</div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Layout Container -->
+    <div class="flex pt-14 pb-16 md:pb-0 min-h-screen">
+        <!-- SideNavBar / BottomNavBar -->
+        <aside class="flex fixed bottom-0 left-0 right-0 md:top-14 md:bottom-0 md:right-auto flex-row md:flex-col w-full md:w-sidebar-width z-40 bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-md border-t md:border-t-0 md:border-r border-surface-container-high">
+            <!-- Header (Desktop Only) -->
+            <div class="hidden md:flex p-gutter border-b border-surface-container-high/50 items-center gap-3">
+                <div class="w-10 h-10 rounded bg-surface-container-lowest inset-shadow-custom flex items-center justify-center border border-outline-variant/30">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">album</span>
+                </div>
+                <div>
+                    <h2 class="font-headline-sm text-headline-sm text-primary">Project Alpha</h2>
+                    <p class="font-label-mono text-label-mono text-on-surface-variant/70 mt-0.5">Mastering Phase</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <div class="flex-1 py-2 md:py-4 flex flex-row md:flex-col gap-1 px-2 justify-around md:justify-start">
+                <!-- Studio -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="studio.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">equalizer</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Studio</span>
+                </a>
+                <!-- Tracks -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="dashboard.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors" style="font-variation-settings: 'FILL' 0;">queue_music</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Tracks</span>
+                </a>
+                <!-- Account -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="account.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">account_circle</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Account</span>
+                </a>
+                <!-- About Us -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-primary border-t-2 md:border-t-0 md:border-l-4 border-primary bg-surface-variant font-bold md:translate-x-1 duration-150 relative" href="about.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px]" style="font-variation-settings: 'FILL' 1;">info</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md">About</span>
+                </a>
+            </div>
+            <!-- Footer Section (Desktop Only) -->
+            <div class="hidden md:flex p-4 border-t border-surface-container-high/50 flex-col gap-2">
+                <button class="w-full hardware-btn-primary rounded py-2 px-4 flex items-center justify-center gap-2 transition-all font-body-md text-body-md font-semibold" onclick="window.location.href='studio.html'">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    New Project
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="flex-1 ml-0 md:ml-sidebar-width bg-background transition-all">
+            <div class="p-4 md:p-8 max-w-[1400px] mx-auto w-full flex flex-col gap-8">
+                <!-- Page Header -->
+                <div class="border-b border-outline-variant/10 pb-6">
+                    <h1 class="font-display-lg text-display-lg text-on-surface mb-2 tracking-tight">The Harmonica Lab</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+                        Meet the creative team behind Harmonica. We combine high-end audio engineering, beautiful modular aesthetics, and high-performance frontend interfaces to revolutionize how you compose.
+                    </p>
+                </div>
+
+                <!-- Concept Container: Modular Soundwave Express -->
+                <div class="relative w-full overflow-hidden bg-surface-container/30 border border-outline-variant/20 rounded-2xl p-6 md:p-10 shadow-2xl">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.08),transparent_50%)]"></div>
+                    
+                    <!-- Rails Track (Horizontal Audio Wave Line) -->
+                    <div class="absolute bottom-[92px] left-0 right-0 h-[2px] bg-outline-variant/20"></div>
+                    <div class="absolute bottom-[91px] left-0 right-0 h-[4px] glow-track"></div>
+                    
+                    <div class="relative w-full overflow-x-auto no-scrollbar" id="harmonicaExpress">
+                        
+                        <!-- Horizontal Layout for Desktop / Scrollable Row -->
+                        <div class="flex flex-row items-end gap-8 md:gap-6 deck-entrance pb-12 pt-4 px-4 md:px-0 md:justify-center min-w-max">
+                            
+                            <!-- CREATOR WAGON 1: AKHILA -->
+                            <div class="wagon-card chugging bg-surface-container-low border border-outline-variant/20 hover:border-primary/50 rounded-xl p-4 flex flex-col items-center w-[280px] shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300 relative group cursor-pointer" 
+                                 style="animation-delay: 0s;"
+                                 onclick="window.open('https://tenisha5132.github.io/My_Portfolio/', '_blank')">
+                                <!-- Module Header -->
+                                <div class="w-full flex items-center justify-between border-b border-outline-variant/10 pb-2 mb-4 font-label-mono text-[10px] text-on-surface-variant">
+                                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> OSC_1</span>
+                                    <span>AKHILA</span>
+                                </div>
+                                
+                                <!-- Profile Photo with Eurorack Frame -->
+                                <div class="w-full aspect-[4/3] rounded-lg overflow-hidden border border-outline-variant/40 mb-4 relative bg-surface-container-lowest">
+                                    <img src="portfolio/akhila.jpeg" alt="Akhila" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"/>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-60"></div>
+                                </div>
+                                
+                                <!-- Bio / Synthesizer Info -->
+                                <div class="text-center w-full mb-2">
+                                    <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors mb-4">Akhila</h3>
+                                    
+                                    <button class="w-full hardware-btn rounded py-2 text-on-surface flex items-center justify-center gap-2 font-label-mono text-[11px] hover:bg-surface-variant group-hover:border-primary/50 transition-colors">
+                                        <span class="material-symbols-outlined text-[14px]">link</span>
+                                        View Studio Deck
+                                    </button>
+                                </div>
+
+                                <!-- Cassette Reels / Wheel Wheels -->
+                                <div class="flex justify-between w-full absolute -bottom-8 left-0 px-8 pointer-events-none">
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-primary/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-primary/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- CREATOR WAGON 2: UTHKARSH -->
+                            <div class="wagon-card chugging bg-surface-container-low border border-outline-variant/20 hover:border-secondary/50 rounded-xl p-4 flex flex-col items-center w-[280px] shadow-lg hover:shadow-secondary/10 hover:-translate-y-2 transition-all duration-300 relative group cursor-pointer"
+                                 style="animation-delay: 0.15s;"
+                                 onclick="window.open('https://uthkarsh031.github.io/portfolio/', '_blank')">
+                                <!-- Module Header -->
+                                <div class="w-full flex items-center justify-between border-b border-outline-variant/10 pb-2 mb-4 font-label-mono text-[10px] text-on-surface-variant">
+                                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span> OSC_2</span>
+                                    <span>UTHKARSH</span>
+                                </div>
+                                
+                                <!-- Profile Photo with Eurorack Frame -->
+                                <div class="w-full aspect-[4/3] rounded-lg overflow-hidden border border-outline-variant/40 mb-4 relative bg-surface-container-lowest">
+                                    <img src="portfolio/utkarsh.jpeg" alt="Utkarsh" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"/>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-60"></div>
+                                </div>
+                                
+                                <!-- Bio / Synthesizer Info -->
+                                <div class="text-center w-full mb-2">
+                                    <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-secondary transition-colors mb-4">Utkarsh</h3>
+                                    
+                                    <button class="w-full hardware-btn rounded py-2 text-on-surface flex items-center justify-center gap-2 font-label-mono text-[11px] hover:bg-surface-variant group-hover:border-secondary/50 transition-colors">
+                                        <span class="material-symbols-outlined text-[14px]">link</span>
+                                        View Studio Deck
+                                    </button>
+                                </div>
+
+                                <!-- Cassette Reels / Wheel Wheels -->
+                                <div class="flex justify-between w-full absolute -bottom-8 left-0 px-8 pointer-events-none">
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-secondary/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_10px_rgba(236,72,153,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-secondary/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_10px_rgba(236,72,153,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- CREATOR WAGON 3: JAGAPATHI -->
+                            <div class="wagon-card chugging bg-surface-container-low border border-outline-variant/20 hover:border-tertiary/50 rounded-xl p-4 flex flex-col items-center w-[280px] shadow-lg hover:shadow-tertiary/10 hover:-translate-y-2 transition-all duration-300 relative group cursor-pointer"
+                                 style="animation-delay: 0.3s;"
+                                 onclick="window.open('https://jaggu-cpu-afk.github.io/portfolio/', '_blank')">
+                                <!-- Module Header -->
+                                <div class="w-full flex items-center justify-between border-b border-outline-variant/10 pb-2 mb-4 font-label-mono text-[10px] text-on-surface-variant">
+                                    <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></span> OSC_3</span>
+                                    <span>JAGAPATHI</span>
+                                </div>
+                                
+                                <!-- Profile Photo with Eurorack Frame -->
+                                <div class="w-full aspect-[4/3] rounded-lg overflow-hidden border border-outline-variant/40 mb-4 relative bg-surface-container-lowest">
+                                    <img src="portfolio/jaggu.jpeg" alt="Jagapathi" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"/>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-60"></div>
+                                </div>
+                                
+                                <!-- Bio / Synthesizer Info -->
+                                <div class="text-center w-full mb-2">
+                                    <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-[#10b981] transition-colors mb-4">Jagapathi</h3>
+                                    
+                                    <button class="w-full hardware-btn rounded py-2 text-on-surface flex items-center justify-center gap-2 font-label-mono text-[11px] hover:bg-surface-variant group-hover:border-[#10b981]/50 transition-colors">
+                                        <span class="material-symbols-outlined text-[14px]">link</span>
+                                        View Studio Deck
+                                    </button>
+                                </div>
+
+                                <!-- Cassette Reels / Wheel Wheels -->
+                                <div class="flex justify-between w-full absolute -bottom-8 left-0 px-8 pointer-events-none">
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-[#10b981]/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-[#10b981]/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- THE SYNTHESIZER ENGINE (The Train Engine Module) -->
+                            <div class="wagon-card chugging bg-surface-container-low border border-outline-variant/30 rounded-xl p-4 flex flex-col justify-between w-[200px] h-[450px] shadow-2xl relative group bg-gradient-to-br from-surface-container-low to-surface-container-lowest"
+                                 style="animation-delay: 0.45s;">
+                                <!-- Patch Cables visual details -->
+                                <div class="absolute -left-4 top-16 w-8 h-20 border-t-2 border-l-2 border-primary/20 rounded-tl-xl pointer-events-none hidden md:block"></div>
+                                <div class="absolute -left-2 top-28 w-4 h-24 border-t-2 border-l-2 border-secondary/20 rounded-tl-xl pointer-events-none hidden md:block"></div>
+                                
+                                <div class="w-full flex items-center justify-between border-b border-outline-variant/10 pb-2 font-label-mono text-[10px] text-primary">
+                                    <span>CTRL_CENTER</span>
+                                    <span class="material-symbols-outlined text-[12px] animate-spin text-primary">settings_backup_restore</span>
+                                </div>
+                                
+                                <!-- Chimney / Exhaust and smoke notes -->
+                                <div class="h-20 bg-surface-container-lowest rounded-lg border border-outline-variant/40 relative flex flex-col justify-center items-center overflow-visible">
+                                    <div class="w-6 h-10 bg-outline-variant/40 rounded-t relative -top-4 shadow-inner" id="chimneyStack">
+                                        <!-- Animated Notes Floating Up as Synth Smoke -->
+                                        <span class="material-symbols-outlined text-primary text-sm synth-smoke-note" style="animation-delay:0s; left:2px;">music_note</span>
+                                        <span class="material-symbols-outlined text-secondary text-sm synth-smoke-note" style="animation-delay:1.2s; left:8px;">queue_music</span>
+                                        <span class="material-symbols-outlined text-[#10b981] text-sm synth-smoke-note" style="animation-delay:2.5s; left:-4px;">graphic_eq</span>
+                                    </div>
+                                    <span class="font-label-caps text-label-caps text-[9px] text-on-surface-variant -mt-3">STEAM AUDIO EXHAUST</span>
+                                </div>
+                                
+                                <!-- Analog Control Knobs -->
+                                <div class="grid grid-cols-2 gap-3 my-4">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center shadow-inner relative hover:border-primary transition-all cursor-pointer">
+                                            <div class="w-1 h-3 bg-primary rounded absolute top-1 origin-bottom"></div>
+                                        </div>
+                                        <span class="font-label-mono text-[9px] text-on-surface-variant mt-1">HARMONICA</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center shadow-inner relative hover:border-secondary transition-all cursor-pointer">
+                                            <div class="w-1 h-3 bg-secondary rounded absolute top-1 origin-bottom rotate-45"></div>
+                                        </div>
+                                        <span class="font-label-mono text-[9px] text-on-surface-variant mt-1">AI_GEN</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center shadow-inner relative hover:border-[#10b981] transition-all cursor-pointer">
+                                            <div class="w-1 h-3 bg-[#10b981] rounded absolute top-1 origin-bottom -rotate-45"></div>
+                                        </div>
+                                        <span class="font-label-mono text-[9px] text-on-surface-variant mt-1">VOLUME</span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center shadow-inner relative hover:border-primary transition-all cursor-pointer">
+                                            <div class="w-1 h-3 bg-primary rounded absolute top-1 origin-bottom rotate-90"></div>
+                                        </div>
+                                        <span class="font-label-mono text-[9px] text-on-surface-variant mt-1">BPM_SYNC</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center font-display-md text-[14px] font-bold text-on-surface tracking-wider">
+                                    THE ENGINE
+                                </div>
+                                
+                                <!-- Play Stop Control Button -->
+                                <button id="btnToggleWheels" class="w-full mt-2 hardware-btn-primary rounded py-2 text-on-primary flex items-center justify-center gap-1 font-label-mono text-[10px] font-bold shadow-md">
+                                    <span class="material-symbols-outlined text-[14px]" id="enginePlayIcon">pause</span>
+                                    <span id="engineStatusText">PAUSE LOCOMOTION</span>
+                                </button>
+                                
+                                <!-- Cassette Reels / Wheel Wheels -->
+                                <div class="flex justify-between w-full absolute -bottom-8 left-0 px-8 pointer-events-none">
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-primary/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full border-4 border-outline-variant bg-surface-container flex items-center justify-center shadow-lg relative z-20">
+                                        <div class="w-7 h-7 rounded-full border border-dashed border-primary/50 cassette-reel flex items-center justify-center">
+                                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Locomotive toggle for the Cassette Wheels/Reels
+        const btnToggle = document.getElementById('btnToggleWheels');
+        const express = document.getElementById('harmonicaExpress');
+        const icon = document.getElementById('enginePlayIcon');
+        const statusText = document.getElementById('engineStatusText');
+
+        btnToggle.addEventListener('click', () => {
+            if (express.classList.contains('train-stopped')) {
+                // Resume locomotion
+                express.classList.remove('train-stopped');
+                icon.textContent = 'pause';
+                statusText.textContent = 'PAUSE LOCOMOTION';
+            } else {
+                // Pause locomotion
+                express.classList.add('train-stopped');
+                icon.textContent = 'play_arrow';
+                statusText.textContent = 'START LOCOMOTION';
+            }
+        });
+    </script>
+</body>
+</html>

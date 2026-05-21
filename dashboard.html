@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Tracks - Harmonica</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Decoupled Harmonica Theme Configuration & Stylesheets -->
+    <script src="js/tailwind-config.js"></script>
+    <link href="css/harmonica-ds.css" rel="stylesheet"/>
+    <link href="css/main.css" rel="stylesheet"/>
+</head>
+<body class="font-body-md text-body-md min-h-screen overflow-x-hidden selection:bg-primary selection:text-on-primary bg-background text-on-background">
+    <!-- TopNavBar Component -->
+    <nav aria-label="Top Navigation" class="fixed top-0 flex justify-between items-center w-full px-gutter h-14 z-50 bg-surface shadow-sm border-b border-outline-variant/10">
+        <div class="flex items-center gap-6">
+            <!-- Brand -->
+            <div class="font-headline-md text-headline-md font-bold text-primary tracking-tight cursor-pointer" onclick="window.location.href='dashboard.html'">
+                Harmonica
+            </div>
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center gap-4 ml-4">
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">File</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Edit</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">View</a>
+                <a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Project</a>
+            </div>
+        </div>
+        <!-- Search Bar (on_left configuration relative to actions) -->
+        <div class="flex-1 max-w-md mx-6 hidden lg:block">
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-sm">search</span>
+                <input class="w-full h-8 pl-9 pr-3 bg-surface-container-lowest border border-outline-variant/30 rounded text-on-surface font-label-mono text-label-mono inset-shadow-custom focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container transition-all placeholder:text-on-surface-variant/50" placeholder="Global Search..." type="text" id="globalSearchInput"/>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Text Actions -->
+            <button class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200">Export</button>
+            <button class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors duration-200">Share</button>
+            <div class="w-px h-4 bg-outline-variant/50 mx-2"></div>
+            <!-- Icon Actions -->
+            <button aria-label="settings" class="text-on-surface-variant hover:text-primary transition-colors duration-200 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant" onclick="window.location.href='account.html'">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+            </button>
+            <button aria-label="notifications" class="text-on-surface-variant hover:text-primary transition-colors duration-200 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-variant relative">
+                <span class="material-symbols-outlined text-[20px]">notifications</span>
+                <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full"></span>
+            </button>
+            <!-- Profile -->
+            <div class="w-8 h-8 rounded-full bg-surface-variant ml-2 border border-outline-variant/50 overflow-hidden cursor-pointer hover:border-primary transition-colors" onclick="window.location.href='account.html'">
+                <div class="w-full h-full bg-secondary-container/20 flex items-center justify-center text-primary font-label-caps text-label-caps">US</div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Layout Container -->
+    <div class="flex pt-14 pb-16 md:pb-0 min-h-screen">
+        <!-- SideNavBar / BottomNavBar -->
+        <aside class="flex fixed bottom-0 left-0 right-0 md:top-14 md:bottom-0 md:right-auto flex-row md:flex-col w-full md:w-sidebar-width z-40 bg-surface-container shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-md border-t md:border-t-0 md:border-r border-surface-container-high">
+            <!-- Header (Desktop Only) -->
+            <div class="hidden md:flex p-gutter border-b border-surface-container-high/50 items-center gap-3">
+                <div class="w-10 h-10 rounded bg-surface-container-lowest inset-shadow-custom flex items-center justify-center border border-outline-variant/30">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">album</span>
+                </div>
+                <div>
+                    <h2 class="font-headline-sm text-headline-sm text-primary">Project Alpha</h2>
+                    <p class="font-label-mono text-label-mono text-on-surface-variant/70 mt-0.5">Mastering Phase</p>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <div class="flex-1 py-2 md:py-4 flex flex-row md:flex-col gap-1 px-2 justify-around md:justify-start">
+                <!-- Studio -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="studio.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">equalizer</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Studio</span>
+                </a>
+                <!-- Tracks -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-primary border-t-2 md:border-t-0 md:border-l-4 border-primary bg-surface-variant font-bold md:translate-x-1 duration-150 relative" href="dashboard.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px]" style="font-variation-settings: 'FILL' 1;">queue_music</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md">Tracks</span>
+                </a>
+                <!-- Account -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="account.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">account_circle</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">Account</span>
+                </a>
+                <!-- About -->
+                <a class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 px-3 py-1 md:py-2.5 rounded text-on-surface-variant hover:bg-surface-container-highest transition-all group" href="about.html">
+                    <span class="material-symbols-outlined text-[24px] md:text-[20px] group-hover:text-on-surface transition-colors">info</span>
+                    <span class="font-label-mono text-[10px] md:font-body-md md:text-body-md group-hover:text-on-surface transition-colors">About</span>
+                </a>
+            </div>
+            <!-- Footer Section (Desktop Only) -->
+            <div class="hidden md:flex p-4 border-t border-surface-container-high/50 flex-col gap-2">
+                <!-- CTA: New Project -->
+                <button class="w-full hardware-btn-primary rounded py-2 px-4 flex items-center justify-center gap-2 transition-all font-body-md text-body-md font-semibold" onclick="createNewProject()">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    New Project
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="flex-1 ml-0 md:ml-sidebar-width bg-background transition-all">
+            <div class="p-4 md:p-8 max-w-[1400px] mx-auto w-full">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                <div>
+                    <h1 class="font-display-lg text-display-lg text-on-surface mb-2">My Projects</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Manage your arrangement drafts, mix sessions, and final masters across all connected studio environments.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+                    <button id="btnImport" class="w-full sm:w-auto hardware-btn rounded px-4 py-2 text-on-surface flex items-center justify-center gap-2 font-label-mono text-label-mono">
+                        <span class="material-symbols-outlined text-[16px]">folder_open</span>
+                        Import
+                    </button>
+                    <button class="w-full sm:w-auto hardware-btn-primary rounded px-6 py-2 flex items-center justify-center gap-2 font-body-md text-body-md font-bold tracking-wide" onclick="createNewProject()">
+                        <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                        New Project
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Toolbar & Filters -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 bg-surface p-2 md:p-1 rounded border border-outline-variant/20 shadow-sm gap-4">
+                <div class="flex overflow-x-auto no-scrollbar gap-1 w-full md:w-auto pb-2 md:pb-0 border-b md:border-b-0 border-outline-variant/10">
+                    <button data-filter="all" class="px-4 py-1.5 rounded bg-secondary-container text-on-secondary-container font-label-mono text-label-mono whitespace-nowrap">All Projects</button>
+                    <button data-filter="recent" class="px-4 py-1.5 rounded hover:bg-surface-variant text-on-surface-variant font-label-mono text-label-mono whitespace-nowrap transition-colors">Recent</button>
+                    <button data-filter="shared" class="px-4 py-1.5 rounded hover:bg-surface-variant text-on-surface-variant font-label-mono text-label-mono whitespace-nowrap transition-colors">Shared</button>
+                    <button data-filter="tags" class="px-4 py-1.5 rounded hover:bg-surface-variant text-on-surface-variant font-label-mono text-label-mono whitespace-nowrap transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">sell</span> Tags
+                    </button>
+                </div>
+                <div class="flex items-center justify-end gap-2 pr-2">
+                    <button id="btnListView" class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant transition-colors" title="List View">
+                        <span class="material-symbols-outlined text-[20px]">view_list</span>
+                    </button>
+                    <button id="btnGridView" class="w-8 h-8 flex items-center justify-center rounded bg-surface-variant text-primary transition-colors" title="Grid View">
+                        <span class="material-symbols-outlined text-[20px]">grid_view</span>
+                    </button>
+                    <div class="w-px h-4 bg-outline-variant/50 mx-1"></div>
+                    <button id="btnSort" class="flex items-center gap-1 px-2 py-1 hover:bg-surface-variant rounded text-on-surface-variant font-label-mono text-label-mono transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">sort</span> Sort
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Projects Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-gutter" id="projectsGrid">
+                <!-- Javascript will inject project cards here -->
+            </div>
+            
+            <!-- Pagination / Load More (Subtle) -->
+            <div class="mt-12 flex justify-center">
+                <button class="px-6 py-2 rounded bg-surface-variant text-on-surface-variant font-label-mono text-label-mono border border-outline-variant/20 hover:text-on-surface hover:border-outline-variant/50 transition-all shadow-sm">
+                    Load Older Projects
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Behaviors Script -->
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

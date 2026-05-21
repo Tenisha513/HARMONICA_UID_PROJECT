@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Studio - Harmonica</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tone.js Production Sound Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Decoupled Harmonica Theme Configuration & Stylesheets -->
+    <script src="js/tailwind-config.js"></script>
+    <link href="css/harmonica-ds.css" rel="stylesheet"/>
+    <link href="css/main.css" rel="stylesheet"/>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen w-screen overflow-hidden flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+    <!-- TopAppBar -->
+    <header class="w-full bg-surface shadow-sm border-b border-outline-variant/20 z-50">
+        <!-- Row 1: Logo + Back | Title (center) | BPM+Key (desktop inline) | Actions -->
+        <div class="flex items-center px-gutter py-2 md:py-0 md:min-h-[56px] gap-2">
+
+            <!-- Left: Brand + Back -->
+            <div class="flex items-center gap-2 shrink-0">
+                <h1 class="font-display-lg font-bold tracking-tighter text-on-surface cursor-pointer text-[18px] md:text-[22px]" onclick="window.location.href='dashboard.html'">HARMONICA</h1>
+                <button class="text-primary font-bold font-label-mono text-[11px] hover:bg-surface-bright transition-colors px-2 py-1 rounded" onclick="window.location.href='dashboard.html'">
+                    &larr; <span class="hidden sm:inline">Back</span>
+                </button>
+            </div>
+
+            <!-- Center: Project Title -->
+            <div class="hidden sm:block text-center group cursor-pointer mx-auto shrink-0" id="projectTitleContainer" title="Click to rename project">
+                <div class="flex items-center justify-center gap-1">
+                    <h2 class="font-headline-sm text-primary tracking-tight font-semibold text-[13px] md:text-base truncate max-w-[140px] lg:max-w-[220px]" id="activeProjectTitle">Neon Horizon Mix</h2>
+                    <span class="material-symbols-outlined text-[14px] text-on-surface-variant/50 opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
+                </div>
+                <p class="font-label-mono text-on-surface-variant/50 text-[9px]" id="saveStateIndicator">Local Sync Active</p>
+            </div>
+
+            <!-- Desktop BPM + Key controls (inline, no absolute positioning) -->
+            <div class="hidden md:flex items-center gap-2 shrink-0 font-label-mono text-label-mono text-on-surface-variant">
+                <div class="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded border border-outline-variant/20 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px] text-primary">speed</span>
+                    <input class="w-12 bg-transparent text-on-surface font-bold text-center border-none focus:ring-0 outline-none p-0" id="bpmInputDesktop" max="240" min="40" type="number" value="120"/>
+                    <span class="text-[10px] text-on-surface-variant/50">BPM</span>
+                </div>
+                <div class="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded border border-outline-variant/20 shadow-sm">
+                    <span class="material-symbols-outlined text-[16px] text-secondary">music_note</span>
+                    <select class="bg-transparent text-on-surface font-bold border-none focus:ring-0 outline-none p-0 cursor-pointer" id="keySelect">
+                        <option>C</option><option>C#</option><option>D</option><option>D#</option>
+                        <option>E</option><option>F</option><option>F#</option><option>G</option>
+                        <option>G#</option><option>A</option><option>A#</option><option>B</option>
+                    </select>
+                    <select class="bg-transparent text-on-surface font-bold border-none focus:ring-0 outline-none p-0 cursor-pointer" id="scaleSelect">
+                        <option>Major</option><option>Minor</option><option>Dorian</option><option>Phrygian</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right: Action Buttons -->
+            <div class="flex items-center gap-1 ml-auto shrink-0">
+                <button class="font-label-mono text-on-surface font-medium hover:bg-surface-bright transition-colors px-2 md:px-3 py-1.5 rounded border border-outline-variant/30 flex items-center gap-1" id="btnSave">
+                    <span class="material-symbols-outlined text-[16px]">save</span><span class="hidden lg:inline text-[12px]"> Save</span>
+                </button>
+                <button class="font-label-mono text-error font-medium hover:bg-error/10 transition-colors px-2 md:px-3 py-1.5 rounded border border-error/30 flex items-center gap-1" id="btnReset">
+                    <span class="material-symbols-outlined text-[16px]">restart_alt</span><span class="hidden lg:inline text-[12px]"> Reset</span>
+                </button>
+                <button class="font-label-mono text-on-surface-variant font-medium hover:bg-surface-bright transition-colors px-2 md:px-3 py-1.5 rounded border border-outline-variant/30 hidden sm:flex items-center gap-1" id="btnExport">
+                    <span class="material-symbols-outlined text-[16px]">ios_share</span><span class="hidden lg:inline text-[12px]"> Export</span>
+                </button>
+                <button class="font-label-mono bg-primary-container text-on-primary-container hover:brightness-110 transition-all px-2 md:px-3 py-1.5 rounded flex items-center gap-1 font-bold" id="btnShare">
+                    <span class="material-symbols-outlined text-[16px]">share</span><span class="hidden lg:inline text-[12px]"> Share</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Row 2 (mobile): BPM + Key controls - full width strip on mobile -->
+        <div class="flex items-center gap-2 px-gutter py-1.5 md:hidden bg-surface-container-lowest border-t border-outline-variant/10 overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1 bg-surface-container-low px-3 py-1 rounded border border-outline-variant/20 shadow-sm flex-1 justify-center">
+                <span class="material-symbols-outlined text-[14px] text-primary">speed</span>
+                <input class="w-10 bg-transparent text-on-surface font-bold text-center border-none focus:ring-0 outline-none p-0 text-[13px]" id="bpmInput" max="240" min="40" type="number" value="120"/>
+                <span class="text-[9px] text-on-surface-variant/50">BPM</span>
+            </div>
+            <div class="flex items-center gap-1 bg-surface-container-low px-3 py-1 rounded border border-outline-variant/20 shadow-sm flex-1 justify-center">
+                <span class="material-symbols-outlined text-[14px] text-secondary">music_note</span>
+                <select class="bg-transparent text-on-surface font-bold border-none focus:ring-0 outline-none p-0 cursor-pointer text-[13px]" id="keySelectMobile">
+                    <option>C</option><option>C#</option><option>D</option><option>D#</option>
+                    <option>E</option><option>F</option><option>F#</option><option>G</option>
+                    <option>G#</option><option>A</option><option>A#</option><option>B</option>
+                </select>
+                <select class="bg-transparent text-on-surface font-bold border-none focus:ring-0 outline-none p-0 cursor-pointer text-[13px]" id="scaleSelectMobile">
+                    <option>Major</option><option>Minor</option><option>Dorian</option><option>Phrygian</option>
+                </select>
+            </div>
+            <!-- Title visible on very small only -->
+            <div class="sm:hidden text-center cursor-pointer" id="projectTitleContainer2" title="Click to rename">
+                <div class="text-primary font-semibold text-[11px] truncate max-w-[80px]" id="activeProjectTitle2">Project</div>
+            </div>
+        </div>
+
+        <!-- (Desktop BPM+Key now inline in Row 1 above — this block removed) -->
+    </header>
+    
+    <!-- Main Workspace -->
+    <main class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden relative">
+        <!-- SideNavBar / Mix Panel -->
+        <aside class="flex flex-col w-full h-[32%] max-h-[36vh] md:h-full md:max-h-none md:w-sidebar-width bg-surface-container-low shadow-md z-40 border-b md:border-b-0 md:border-r border-outline-variant/20 flex-shrink-0 min-h-0">
+            <div class="p-gutter py-2 md:py-3 border-b border-outline-variant/20 flex justify-between items-center shrink-0">
+                <div>
+                    <h2 class="font-headline-md text-headline-md text-on-surface mb-1">TRACKS</h2>
+                    <p class="font-label-caps text-label-caps text-on-surface-variant/80">Mixer Channels</p>
+                </div>
+                <div class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" id="engineStatus" title="Sound Engine Idle"></div>
+            </div>
+            
+            <!-- Dynamic Track Mixer Channel Wrapper -->
+            <div class="flex-1 min-h-0 overflow-y-auto py-2 space-y-1.5 custom-scrollbar" id="trackList">
+                <!-- Tracks generated via js/studio.js -->
+            </div>
+
+            <!-- Templates Panel (below tracks, same card style) -->
+            <div class="shrink-0 border-t border-outline-variant/20">
+                <div class="p-gutter py-2 md:py-3 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface mb-1">TEMPLATES</h2>
+                        <p class="font-label-caps text-label-caps text-on-surface-variant/80">Starter Arrangements</p>
+                    </div>
+                    <span class="font-label-mono text-[12px] text-tertiary font-semibold" id="templateCount">5</span>
+                </div>
+                <div class="pb-2 space-y-1.5 max-h-[220px] overflow-y-auto custom-scrollbar" id="templatesList">
+                    <button type="button" class="template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer bg-surface-container border-outline-variant/10 text-on-surface-variant hover:bg-surface-container-high" data-template="edm" data-bpm="128">
+                        <span class="material-symbols-outlined text-[20px] text-on-surface-variant/80" style="font-variation-settings: 'FILL' 1;">library_music</span>
+                        <div class="flex flex-col text-left">
+                            <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">EDM Beat</span>
+                            <span class="font-label-mono text-[9px] text-on-surface-variant/50">128 BPM · 4 Tracks</span>
+                        </div>
+                    </button>
+                    <button type="button" class="template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer bg-surface-container border-outline-variant/10 text-on-surface-variant hover:bg-surface-container-high" data-template="lofi" data-bpm="82">
+                        <span class="material-symbols-outlined text-[20px] text-on-surface-variant/80" style="font-variation-settings: 'FILL' 1;">coffee</span>
+                        <div class="flex flex-col text-left">
+                            <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">Lofi Beat</span>
+                            <span class="font-label-mono text-[9px] text-on-surface-variant/50">82 BPM · 3 Tracks</span>
+                        </div>
+                    </button>
+                    <button type="button" class="template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer bg-surface-container border-outline-variant/10 text-on-surface-variant hover:bg-surface-container-high" data-template="cinematic" data-bpm="90">
+                        <span class="material-symbols-outlined text-[20px] text-on-surface-variant/80" style="font-variation-settings: 'FILL' 1;">movie</span>
+                        <div class="flex flex-col text-left">
+                            <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">Cinematic Theme</span>
+                            <span class="font-label-mono text-[9px] text-on-surface-variant/50">90 BPM · 3 Tracks</span>
+                        </div>
+                    </button>
+                    <button type="button" class="template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer bg-surface-container border-outline-variant/10 text-on-surface-variant hover:bg-surface-container-high" data-template="horror" data-bpm="65">
+                        <span class="material-symbols-outlined text-[20px] text-on-surface-variant/80" style="font-variation-settings: 'FILL' 1;">nightlight</span>
+                        <div class="flex flex-col text-left">
+                            <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">Horror Ambience</span>
+                            <span class="font-label-mono text-[9px] text-on-surface-variant/50">65 BPM · 3 Tracks</span>
+                        </div>
+                    </button>
+                    <button type="button" class="template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer bg-surface-container border-outline-variant/10 text-on-surface-variant hover:bg-surface-container-high" data-template="piano" data-bpm="100">
+                        <span class="material-symbols-outlined text-[20px] text-on-surface-variant/80" style="font-variation-settings: 'FILL' 1;">piano</span>
+                        <div class="flex flex-col text-left">
+                            <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">Piano Melody</span>
+                            <span class="font-label-mono text-[9px] text-on-surface-variant/50">100 BPM · 1 Track</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-outline-variant/20 shrink-0">
+                <button class="w-full py-2 border border-outline-variant border-dashed text-on-surface-variant hover:text-primary hover:border-primary rounded transition-colors flex items-center justify-center gap-2 font-label-caps text-label-caps" id="addTrackBtn">
+                    <span class="material-symbols-outlined text-[18px]">add</span> Add Track
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Central Canvas Sequencer Wrapper -->
+        <section class="flex-1 bg-background relative overflow-hidden flex flex-col z-10" id="sequencerGrid">
+            <!-- Timeline / Ruler Bar -->
+            <div class="h-8 border-b border-surface-container-high flex bg-surface-container-lowest shrink-0">
+                <div class="w-16 border-r border-surface-container-high shrink-0 bg-surface-container-lowest"></div> <!-- Piano keys alignment offset spacer -->
+                <div class="flex-1 overflow-hidden relative">
+                    <canvas id="rulerCanvas" class="absolute top-0 left-0 h-full"></canvas>
+                </div>
+            </div>
+            
+            <!-- Main Grid & Scroll Area -->
+            <div class="flex-1 flex overflow-hidden relative">
+                <!-- Playhead (Overlay layer) -->
+                <div class="absolute left-16 top-0 bottom-0 w-px bg-error z-20 pointer-events-none shadow-[0_0_8px_rgba(255,180,171,0.6)]" id="playhead">
+                    <div class="absolute top-0 -left-1.5 w-3 h-3 bg-error rounded-full shadow-md"></div>
+                </div>
+                
+                <!-- Piano Keys Column (Y-Axis) -->
+                <div class="w-16 bg-surface-container border-r border-surface-container-high flex flex-col shrink-0 overflow-y-hidden shadow-md z-10" id="keysCol">
+                    <!-- Piano keys rendered via js/studio.js -->
+                </div>
+                
+                <!-- Scrollable Notes Grid (X-Axis) -->
+                <div class="flex-1 relative overflow-auto custom-scrollbar bg-surface-container-lowest" id="gridContainer">
+                    <div class="relative w-full h-full">
+                        <!-- Canvas Renderer -->
+                        <canvas id="gridCanvas" class="absolute top-0 left-0 cursor-crosshair"></canvas>
+                        <!-- Loading Indicator Shimmer -->
+                        <div class="absolute inset-0 bg-background/50 backdrop-blur-[1px] hidden items-center justify-center z-30 transition-all" id="loadingShimmer">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                <span class="font-label-mono text-label-mono text-primary animate-pulse">Generating Pattern...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Virtual Keyboard Panel -->
+            <div id="virtualKeyboard" class="p-4 bg-surface-container border-t border-outline-variant/20 shrink-0">
+                <div class="flex justify-between items-center px-1 mb-3">
+                    <span class="font-headline-sm text-on-surface font-semibold text-sm tracking-wider">Virtual Keyboard</span>
+                    <div class="flex items-center gap-2">
+                        <!-- Sustain Toggle Switch -->
+                        <label class="relative inline-flex items-center cursor-pointer select-none">
+                            <input type="checkbox" id="keyboardSustain" class="sr-only peer">
+                            <div class="w-8 h-4 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary peer-checked:after:bg-background"></div>
+                            <span class="ml-2 text-xs font-label-mono text-on-surface-variant/80">Sustain</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="relative w-full h-24 select-none">
+                    <!-- White Keys Container -->
+                    <div class="flex w-full h-full relative z-10">
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="C4">C4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="D4">D4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="E4">E4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="F4">F4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="G4">G4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="A4">A4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="B4">B4</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="C5">C5</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="D5">D5</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="E5">E5</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="F5">F5</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white border-r border-slate-300 rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="G5">G5</div>
+                        <div class="white-key flex-1 h-full bg-gradient-to-b from-[#e2e8f0] to-[#f8fafc] hover:from-white hover:to-white rounded-b-md shadow flex flex-col justify-end pb-2 items-center text-[10px] text-slate-500 font-bold cursor-pointer transition-all active:from-slate-200 active:to-slate-300" data-note="A5">A5</div>
+                    </div>
+                    
+                    <!-- Black Keys Container -->
+                    <div class="absolute inset-x-0 top-0 h-0 z-20 pointer-events-none">
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 1 - 11px);" data-note="C#4">C#4</div>
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 2 - 11px);" data-note="D#4">D#4</div>
+                        
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 4 - 11px);" data-note="F#4">F#4</div>
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 5 - 11px);" data-note="G#4">G#4</div>
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 6 - 11px);" data-note="A#4">A#4</div>
+                        
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 8 - 11px);" data-note="C#5">C#5</div>
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 9 - 11px);" data-note="D#5">D#5</div>
+                        
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 11 - 11px);" data-note="F#5">F#5</div>
+                        <div class="absolute w-[22px] h-[56px] bg-gradient-to-b from-[#1e293b] to-[#0f172a] hover:from-[#334155] hover:to-[#1e293b] border border-black rounded-b shadow-lg text-[8px] text-white flex flex-col justify-end pb-1.5 items-center font-semibold cursor-pointer transition-all active:from-[#020617] active:to-black pointer-events-auto" style="left: calc((100% / 13) * 12 - 11px);" data-note="G#5">G#5</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Right Inspector (Track & Note controls) -->
+        <aside class="hidden xl:flex w-inspector-width bg-surface-container-low shadow-2xl border-l border-outline-variant/20 flex-col z-40">
+            <div class="p-gutter border-b border-outline-variant/20 flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary" id="inspectorIcon">piano</span>
+                <div>
+                    <h2 class="font-headline-sm text-headline-sm text-on-surface" id="propHeader">Piano</h2>
+                    <p class="font-label-caps text-label-caps text-on-surface-variant/80">Properties Panel</p>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-gutter space-y-6 custom-scrollbar">
+                <!-- Audio Monitors Section -->
+                <div id="audioMonitors" class="space-y-4">
+                    <h3 class="font-label-caps text-label-caps text-on-surface-variant/80 tracking-wider">Audio Monitors</h3>
+                    
+                    <!-- Frequency Bars Card -->
+                    <div class="relative w-full h-24 bg-surface-container-lowest border border-outline-variant/20 rounded-lg overflow-hidden group shadow-inner">
+                        <canvas id="freqCanvas" class="w-full h-full block"></canvas>
+                        <span class="absolute bottom-1.5 left-2.5 font-label-mono text-[9px] text-on-surface-variant/60 uppercase tracking-wider bg-background/60 px-1 rounded pointer-events-none">Frequency Bars</span>
+                    </div>
+                    
+                    <!-- Circular Spectrum Card -->
+                    <div class="relative w-full h-24 bg-surface-container-lowest border border-outline-variant/20 rounded-lg overflow-hidden group shadow-inner">
+                        <canvas id="circleCanvas" class="w-full h-full block"></canvas>
+                        <span class="absolute bottom-1.5 left-2.5 font-label-mono text-[9px] text-on-surface-variant/60 uppercase tracking-wider bg-background/60 px-1 rounded pointer-events-none">Circular Spectrum</span>
+                    </div>
+                    
+                    <!-- Waveform Monitor Card -->
+                    <div class="relative w-full h-24 bg-surface-container-lowest border border-outline-variant/20 rounded-lg overflow-hidden group shadow-inner">
+                        <canvas id="waveCanvas" class="w-full h-full block"></canvas>
+                        <span class="absolute bottom-1.5 left-2.5 font-label-mono text-[9px] text-on-surface-variant/60 uppercase tracking-wider bg-background/60 px-1 rounded pointer-events-none">Waveform Monitor</span>
+                    </div>
+                    
+                    <div class="h-px bg-outline-variant/10"></div>
+                </div>
+
+                <!-- Track Properties Tab -->
+                <div id="trackProps" class="space-y-6">
+                    <!-- Volume Control (Horizontal Fader with tactile peak level indicator) -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Volume</span>
+                            <span class="font-label-mono text-label-mono text-on-surface font-bold" id="volumeVal">-3.0 dB</span>
+                        </div>
+                        <div class="relative flex items-center">
+                            <input class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary border border-outline-variant/20 inset-shadow-custom" id="propVolume" max="6" min="-60" step="1" type="range" value="0"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Pan Control (Horizontal Slider with tactile center detent tick) -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Pan</span>
+                            <span class="font-label-mono text-label-mono text-on-surface" id="panVal">Center</span>
+                        </div>
+                        <div class="relative flex items-center">
+                            <input class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-secondary border border-outline-variant/20 inset-shadow-custom" id="propPan" max="1" min="-1" step="0.1" type="range" value="0"/>
+                        </div>
+                    </div>
+                    
+                    <div class="h-px bg-outline-variant/10"></div>
+                    
+                    <!-- Effects FX Sends (Switch Toggles) -->
+                    <div class="space-y-3">
+                        <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-2">Effects Rack</h3>
+                        
+                        <!-- Reverb Toggle -->
+                        <div class="flex items-center justify-between bg-surface-container p-3 rounded border border-outline-variant/20 shadow-sm hover:border-outline-variant/50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <button class="w-5 h-5 rounded-full border border-outline-variant/50 shadow-inner flex items-center justify-center transition-all duration-300" id="effReverb">
+                                    <div class="w-2.5 h-2.5 bg-transparent rounded-full transition-all" id="effReverbIndicator"></div>
+                                </button>
+                                <span class="font-label-mono text-label-mono text-on-surface">Reverb Space</span>
+                            </div>
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant/70 cursor-pointer hover:text-primary">tune</span>
+                        </div>
+                        
+                        <!-- Delay Toggle -->
+                        <div class="flex items-center justify-between bg-surface-container p-3 rounded border border-outline-variant/20 shadow-sm hover:border-outline-variant/50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <button class="w-5 h-5 rounded-full border border-outline-variant/50 shadow-inner flex items-center justify-center transition-all duration-300" id="effDelay">
+                                    <div class="w-2.5 h-2.5 bg-transparent rounded-full transition-all" id="effDelayIndicator"></div>
+                                </button>
+                                <span class="font-label-mono text-label-mono text-on-surface">Feedback Echo</span>
+                            </div>
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant/70 cursor-pointer hover:text-primary">tune</span>
+                        </div>
+                        
+                        <!-- Chorus Toggle -->
+                        <div class="flex items-center justify-between bg-surface-container p-3 rounded border border-outline-variant/20 shadow-sm hover:border-outline-variant/50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <button class="w-5 h-5 rounded-full border border-outline-variant/50 shadow-inner flex items-center justify-center transition-all duration-300" id="effChorus">
+                                    <div class="w-2.5 h-2.5 bg-transparent rounded-full transition-all" id="effChorusIndicator"></div>
+                                </button>
+                                <span class="font-label-mono text-label-mono text-on-surface">Chorus Chorus</span>
+                            </div>
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant/70 cursor-pointer hover:text-primary">tune</span>
+                        </div>
+                        
+                        <!-- Equalizer Toggle -->
+                        <div class="flex items-center justify-between bg-surface-container p-3 rounded border border-outline-variant/20 shadow-sm hover:border-outline-variant/50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <button class="w-5 h-5 rounded-full border border-outline-variant/50 shadow-inner flex items-center justify-center transition-all duration-300" id="effEqualizer">
+                                    <div class="w-2.5 h-2.5 bg-transparent rounded-full transition-all" id="effEqualizerIndicator"></div>
+                                </button>
+                                <span class="font-label-mono text-label-mono text-on-surface">Equalizer (EQ3)</span>
+                            </div>
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant/70 cursor-pointer hover:text-primary">tune</span>
+                        </div>
+                    </div>
+                    
+                    <div class="h-px bg-outline-variant/10"></div>
+                    
+                    <!-- Hardware Milled Signal chain visualize -->
+                    <div class="bg-surface-container-lowest p-3 rounded border border-outline-variant/20 inset-shadow-custom">
+                        <div class="font-label-caps text-label-caps text-on-surface-variant/60 mb-2">SIGNAL FLOW</div>
+                        <div class="flex items-center gap-1.5 font-label-mono text-label-mono text-on-surface-variant text-[10px]" id="effectChain">
+                            Instrument &rarr; Master Out
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Note Properties Tab (Shown contextually on selection) -->
+                <div id="noteProps" class="space-y-6 hidden">
+                    <div class="space-y-2">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant">Selected Pitch</span>
+                        <div class="bg-surface-container-highest border border-outline-variant/20 text-primary font-label-mono text-[14px] px-4 py-2 rounded text-center font-bold tracking-wider" id="propPitch">
+                            C3
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Note Velocity</span>
+                            <span class="font-label-mono text-label-mono text-on-surface" id="velocityVal">100</span>
+                        </div>
+                        <input class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary border border-outline-variant/20 inset-shadow-custom" id="propVelocity" max="127" min="0" type="range" value="100"/>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant">Duration Grid</span>
+                        <select class="w-full bg-surface-container-lowest text-on-surface border border-outline-variant/30 rounded px-3 py-2 font-label-mono text-label-mono focus:ring-1 focus:ring-primary focus:border-primary outline-none cursor-pointer" id="propDuration">
+                            <option value="16n">1/16 Beat</option>
+                            <option value="8n">1/8 Beat</option>
+                            <option value="4n">1/4 Beat (Quarter)</option>
+                            <option value="2n">1/2 Beat (Half)</option>
+                            <option value="1n">1 Bar (Whole)</option>
+                        </select>
+                    </div>
+                    
+                    <button class="w-full hardware-btn rounded py-2 text-on-surface hover:text-primary font-label-mono text-label-mono transition-colors" id="btnQuantize">
+                        Quantize Note Start
+                    </button>
+                    
+                    <div class="p-3 bg-primary/5 rounded border border-primary/20 text-on-surface-variant text-[11px] leading-relaxed">
+                        <span class="text-primary font-bold">PRO TIP:</span> Click right mouse button on an existing note on the grid grid to erase it instantly, or drag the rightmost edge to resize.
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+    
+    <!-- Footer / Transport HUD — capped to viewport, scroll inside AI panel -->
+    <footer class="studio-footer shrink-0 bg-surface-container-lowest border-t border-outline-variant/30 shadow-[0_-4px_12px_rgba(0,0,0,0.5)] z-50 max-h-[42vh] md:max-h-[32vh] overflow-hidden flex flex-col">
+
+        <!-- ══ MOBILE LAYOUT ══ -->
+        <div class="flex flex-col md:hidden min-h-0 flex-1 overflow-y-auto custom-scrollbar px-3 py-2.5 gap-2.5">
+
+            <!-- Transport Controls + Timer -->
+            <div class="flex items-center justify-center gap-3 shrink-0">
+                <div class="font-label-mono text-primary tracking-widest text-[20px] drop-shadow-[0_0_8px_rgba(255,193,116,0.3)] bg-background/50 border border-outline-variant/10 px-4 py-0.5 rounded shadow-inner" id="posDisplay">
+                    001 : 1 : 00
+                </div>
+                <button class="w-9 h-9 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-on-surface border border-outline-variant/20 shadow-sm active:translate-y-px" id="btnRewindMobile" title="Rewind" onclick="document.getElementById('btnRewind').click()">
+                    <span class="material-symbols-outlined text-[18px]">skip_previous</span>
+                </button>
+                <button class="w-11 h-11 flex items-center justify-center rounded-full bg-primary text-on-primary hover:brightness-110 shadow-[0_2px_8px_rgba(255,193,116,0.3)] active:translate-y-px" id="btnPlayMobile" title="Play / Pause" onclick="document.getElementById('btnPlay').click()">
+                    <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                </button>
+                <button class="w-9 h-9 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-on-surface border border-outline-variant/20 shadow-sm active:translate-y-px" id="btnStopMobile" title="Stop" onclick="document.getElementById('btnStop').click()">
+                    <span class="material-symbols-outlined text-[18px]">stop</span>
+                </button>
+                <button class="w-9 h-9 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-error border border-outline-variant/20 shadow-sm active:translate-y-px relative overflow-hidden group" id="btnRecordMobile" title="Record" onclick="document.getElementById('btnRecord').click()">
+                    <div class="absolute inset-0 bg-error/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                </button>
+            </div>
+
+            <!-- AI Mood Composer (scrollable) -->
+            <div class="ai-mood-panel w-full min-h-0 flex flex-col rounded-lg border border-outline-variant/20 bg-surface-container/80 overflow-hidden">
+                <div class="shrink-0 p-2.5 space-y-2 border-b border-outline-variant/10">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
+                        <span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">AI Mood Composer</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" class="flex-1 h-9 bg-surface-container-low border border-outline-variant/30 text-on-surface font-body-md text-xs rounded-lg pl-3 pr-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40" id="moodInputMobile" placeholder="Describe a vibe..." spellcheck="false" oninput="document.getElementById('moodInput').value=this.value"/>
+                        <button class="hardware-btn-primary rounded-lg h-9 px-3 flex items-center justify-center gap-1 font-label-caps text-[10px] font-bold shrink-0" onclick="document.getElementById('btnGenerate').click()">
+                            <span>Generate</span>
+                            <span class="material-symbols-outlined text-[14px]">bolt</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="ai-mood-scroll flex-1 min-h-[4.5rem] max-h-[10rem] overflow-y-auto custom-scrollbar p-2">
+                    <div class="flex flex-wrap gap-1.5" id="moodPillsContainerMobile"></div>
+                </div>
+                <div class="ai-mood-scroll-hint shrink-0 flex items-center justify-center gap-1 py-1 text-[9px] font-label-mono text-on-surface-variant/50 border-t border-outline-variant/10">
+                    <span class="material-symbols-outlined text-[14px]">south</span>
+                    <span>Scroll for more moods</span>
+                </div>
+            </div>
+
+            <!-- Master Volume -->
+            <div class="flex items-center justify-center gap-3 shrink-0 pb-0.5">
+                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">volume_up</span>
+                <input class="h-1 w-32 bg-surface-container-highest rounded appearance-none cursor-pointer accent-primary" id="masterVolumeMobile" max="6" min="-60" step="1" type="range" value="0" oninput="document.getElementById('masterVolume').value=this.value"/>
+                <span class="font-label-mono text-[9px] text-on-surface-variant/50">MASTER</span>
+            </div>
+        </div>
+
+        <!-- ══ DESKTOP: one row — transport then AI (uses width, saves height) ══ -->
+        <div class="hidden md:flex flex-1 min-h-0 items-stretch gap-3 px-4 py-2">
+
+            <!-- Grid / brand info (left) -->
+            <div class="shrink-0 flex flex-col justify-center text-on-surface-variant/50 font-label-mono text-[9px] text-left pr-3">
+                <div>GRID: 1/16</div>
+                <div>&copy; HARMONICA</div>
+            </div>
+
+            <!-- Master volume -->
+            <div class="shrink-0 flex flex-col justify-center gap-1 w-[7.5rem]">
+                <span class="material-symbols-outlined text-[16px] text-on-surface-variant" id="volumeIcon">volume_up</span>
+                <input class="h-1 w-full bg-surface-container-highest rounded appearance-none cursor-pointer accent-primary" id="masterVolume" max="6" min="-60" step="1" type="range" value="0"/>
+                <span class="font-label-mono text-[9px] text-on-surface-variant/50">MASTER</span>
+            </div>
+
+            <!-- Transport (fixed position, compact) -->
+            <div class="shrink-0 flex flex-col items-center justify-center gap-1 px-2">
+                <div class="font-label-mono text-primary tracking-widest text-[22px] drop-shadow-[0_0_8px_rgba(255,193,116,0.3)] bg-background/50 border border-outline-variant/10 px-4 py-0.5 rounded shadow-inner">
+                    <span id="posDisplay">001 : 1 : 00</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="w-9 h-9 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-on-surface border border-outline-variant/20 shadow-sm active:translate-y-px" id="btnRewind" title="Rewind">
+                        <span class="material-symbols-outlined text-[18px]">skip_previous</span>
+                    </button>
+                    <button class="w-11 h-11 flex items-center justify-center rounded-full bg-primary text-on-primary hover:brightness-110 shadow-[0_2px_8px_rgba(255,193,116,0.3)] active:translate-y-px" id="btnPlay" title="Play / Pause">
+                        <span class="material-symbols-outlined text-[26px]" id="playIcon" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                    </button>
+                    <button class="w-9 h-9 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-on-surface border border-outline-variant/20 shadow-sm active:translate-y-px" id="btnStop" title="Stop">
+                        <span class="material-symbols-outlined text-[18px]">stop</span>
+                    </button>
+                    <button class="w-9 h-9 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-error border border-outline-variant/20 shadow-sm active:translate-y-px relative overflow-hidden group" id="btnRecord" title="Record (Simulated)">
+                        <div class="absolute inset-0 bg-error/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Mood Composer — fills remaining width, scroll down inside -->
+            <div class="ai-mood-panel flex-1 min-w-0 min-h-0 flex flex-col rounded-lg border border-outline-variant/25 bg-surface-container/60 overflow-hidden shadow-inner">
+                <div class="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-outline-variant/15">
+                    <span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
+                    <span class="font-label-caps text-label-caps text-on-surface tracking-wider">AI Mood Composer</span>
+                    <span class="font-label-mono text-[10px] text-tertiary ml-auto" id="moodCount">9 moods</span>
+                </div>
+                <div class="shrink-0 flex items-center gap-2 px-3 py-2">
+                    <div class="relative flex-1 min-w-0 shadow-inner">
+                        <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-primary text-[18px]">edit_note</span>
+                        <input type="text" class="w-full h-9 bg-surface-container-low border border-outline-variant/30 text-on-surface font-body-md text-xs rounded-lg pl-9 pr-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40" id="moodInput" placeholder="Describe a theme..." spellcheck="false" />
+                    </div>
+                    <button class="hardware-btn-primary rounded-lg h-9 px-4 flex items-center justify-center gap-1.5 font-label-caps text-[10px] font-bold shrink-0" id="btnGenerate">
+                        <span id="genText">Generate</span>
+                        <span class="material-symbols-outlined text-[16px]">bolt</span>
+                    </button>
+                </div>
+                <div class="ai-mood-scroll relative flex-1 min-h-0 overflow-y-auto custom-scrollbar px-3 pb-1">
+                    <div class="flex flex-wrap gap-1.5 py-1" id="moodPillsContainer"></div>
+                    <div class="ai-mood-scroll-fade pointer-events-none sticky bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-surface-container to-transparent"></div>
+                </div>
+                <div class="ai-mood-scroll-hint shrink-0 flex items-center justify-center gap-1 py-1 text-[9px] font-label-mono text-on-surface-variant/50 border-t border-outline-variant/10">
+                    <span class="material-symbols-outlined text-[14px]">south</span>
+                    <span>Scroll for more moods</span>
+                </div>
+            </div>
+        </div>
+
+    </footer>
+    
+    <!-- Toast notifications element -->
+    <div class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-surface-container-highest text-on-surface font-label-mono text-label-mono border border-outline-variant/30 px-6 py-2.5 rounded shadow-2xl opacity-0 translate-y-4 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2" id="toast">
+        <span class="material-symbols-outlined text-primary text-[18px]">info</span>
+        <span id="toastMsg">Initializing Sound Core...</span>
+    </div>
+
+    <!-- Add Track Modal -->
+    <div id="addTrackModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-surface-container shadow-2xl border border-outline-variant/30 rounded-xl w-full max-w-md p-6 scale-95 transition-transform duration-300" id="addTrackModalContent">
+            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Add New Track</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-6">Configure your new synthesizer channel.</p>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block font-label-mono text-[10px] text-on-surface-variant mb-1 uppercase">Track Name</label>
+                    <input type="text" id="newTrackName" class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded px-3 py-2 font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/30" placeholder="e.g. Lead Melody">
+                </div>
+                <div>
+                    <label class="block font-label-mono text-[10px] text-on-surface-variant mb-1 uppercase">Synthesizer Type</label>
+                    <select id="newTrackType" class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded px-3 py-2 font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all appearance-none cursor-pointer">
+                        <option value="PolySynth">Classic Synth (Polyphonic)</option>
+                        <option value="MonoSynth">Bass Synth (Monophonic)</option>
+                        <option value="AMSynth">Modulated Synth (AM)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button id="cancelAddTrack" class="px-4 py-2 rounded font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-highest transition-colors">Cancel</button>
+                <button id="confirmAddTrack" class="px-4 py-2 rounded font-label-caps text-label-caps bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm">Create Track</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Project Modal -->
+    <div id="renameModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-surface-container shadow-2xl border border-outline-variant/30 rounded-xl w-full max-w-sm p-6 scale-95 transition-transform duration-300" id="renameModalContent">
+            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Rename Project</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-6">Enter a new name for your arrangement.</p>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block font-label-mono text-[10px] text-on-surface-variant mb-1 uppercase">Project Title</label>
+                    <input type="text" id="renameInput" class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded px-3 py-2 font-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" value="Neon Horizon Mix">
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button id="cancelRename" class="px-4 py-2 rounded font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-highest transition-colors">Cancel</button>
+                <button id="confirmRename" class="px-4 py-2 rounded font-label-caps text-label-caps bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-surface-container shadow-2xl border border-error/50 rounded-xl w-full max-w-sm p-6 scale-95 transition-transform duration-300" id="resetModalContent">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="material-symbols-outlined text-error text-[24px]">warning</span>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface">Reset Project?</h3>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-6">This will delete all tracks, notes, and generated sequences. This action cannot be undone.</p>
+            
+            <div class="flex justify-end gap-3">
+                <button id="cancelReset" class="px-4 py-2 rounded font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-highest transition-colors">Cancel</button>
+                <button id="confirmReset" class="px-4 py-2 rounded font-label-caps text-label-caps bg-error text-on-error hover:bg-[#ffb4ab] hover:text-[#410002] transition-colors shadow-sm">Erase Everything</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sequencer Engine Logic -->
+    <script src="js/studio.js"></script>
+</body>
+</html>
