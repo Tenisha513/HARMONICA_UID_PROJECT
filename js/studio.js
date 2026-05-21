@@ -1517,7 +1517,7 @@ function bindMoodPills() {
 function generateMoodMusic(moodName) {
   const config = MOODS[moodName];
   if (!config) return;
-  
+
   // Apply BPM parameters
   APP_STATE.bpm = config.bpm;
   const bpmMobile = document.getElementById("bpmInput");
@@ -1525,50 +1525,189 @@ function generateMoodMusic(moodName) {
   if (bpmMobile) bpmMobile.value = config.bpm;
   if (bpmDesktop) bpmDesktop.value = config.bpm;
   Tone.Transport.bpm.value = config.bpm;
-  
-  APP_STATE.notes = [];
-  const bars = APP_STATE.gridConfig.bars; // fill grid
 
+  APP_STATE.notes = [];
+  APP_STATE.noteIdCounter = 0;
+
+  const bars = APP_STATE.gridConfig.bars;
+  const tracks = APP_STATE.tracks;
+  const n = tracks.length;
+
+  // Helper: pick a random note from a scale at a given octave
+  function pickNote(scale, octave, offsetSemis = 0) {
+    const step = scale[Math.floor(Math.random() * scale.length)];
+    const midiNote = (octave + 1) * 12 + step + offsetSemis;
+    const noteName = NOTE_NAMES[midiNote % 12];
+    const noteOctave = Math.floor(midiNote / 12) - 1;
+    return `${noteName}${Math.max(1, Math.min(7, noteOctave))}`;
+  }
+
+  // Helper: push a note safely (only if trackIdx within bounds)
+  function pushNote(trackIdx, time, duration, pitch, velocity) {
+    if (trackIdx >= n) return;
+    const trackId = tracks[trackIdx].id;
+    APP_STATE.notes.push({
+      id: APP_STATE.noteIdCounter++,
+      trackId,
+      time: Math.round(time * 100) / 100,
+      duration,
+      pitch,
+      velocity: Math.round(Math.min(127, Math.max(30, velocity)))
+    });
+  }
+
+  const sc = config.scale;
+  const oct = config.octave;
+
+  // ── Per-mood generation strategies ──────────────────────────────────
   for (let bar = 0; bar < bars; bar++) {
-    // Root chord block note on Bass (Track 1)
-    APP_STATE.notes.push({ id: APP_STATE.noteIdCounter++, trackId: 1, time: bar * 4, duration: 2.0, pitch: `C${config.octave - 1}`, velocity: 100 });
-    if (config.density > 0.5) {
-      APP_STATE.notes.push({ id: APP_STATE.noteIdCounter++, trackId: 1, time: bar * 4 + 2, duration: 2.0, pitch: `G${config.octave - 1}`, velocity: 90 });
-    }
-    
-    // Arp/Lead Patterns (Track 2)
-    const arpStep = config.density > 0.6 ? 0.5 : 1.0;
-    for (let b = 0; b < 4; b += arpStep) {
-      const step = Math.floor(Math.random() * config.scale.length);
-      const interval = config.scale[step];
-      const noteName = NOTE_NAMES[interval % 12];
-      APP_STATE.notes.push({ id: APP_STATE.noteIdCounter++, trackId: 2, time: bar * 4 + b, duration: arpStep / 2, pitch: `${noteName}${config.octave + 1}`, velocity: 80 + Math.random() * 20 });
-    }
-    
-    // Melody notes on Piano (Track 0) or Pad (Track 3)
-    const melTrack = config.pad ? 3 : 0;
-    const notesPerBar = Math.max(1, Math.floor(config.density * 8));
-    for (let i = 0; i < notesPerBar; i++) {
-      const step = Math.floor(Math.random() * config.scale.length);
-      const interval = config.scale[step];
-      const octOff = Math.floor(Math.random() * 2);
-      const noteName = NOTE_NAMES[interval % 12];
-      let beatOffset = i * (4 / notesPerBar);
-      
-      APP_STATE.notes.push({
-        id: APP_STATE.noteIdCounter++,
-        trackId: melTrack,
-        time: bar * 4 + beatOffset,
-        duration: 0.5,
-        pitch: `${noteName}${config.octave + octOff}`,
-        velocity: 80 + Math.random() * 20
+    const bt = bar * 4; // bar start in beats
+
+    if (moodName === 'Chill') {
+      // Sparse: bass on 1 & 3, piano melody with space, no arp
+      pushNote(0, bt,       2.0,  pickNote(sc, oct),       70 + Math.random()*15);  // Bass root
+      if (Math.random() > 0.4) pushNote(0, bt + 2, 2.0, pickNote(sc, oct), 60 + Math.random()*15);
+      // Gentle melody every 2 beats
+      [0, 2].forEach(b => {
+        if (Math.random() > 0.45) {
+          pushNote(1, bt + b, 1.0, pickNote(sc, oct + 1), 55 + Math.random()*20);
+        }
       });
+      // Soft pad chord on beat 1
+      if (n > 2 && Math.random() > 0.3) pushNote(2, bt, 4.0, pickNote(sc, oct + 1, 4), 40 + Math.random()*15);
+
+    } else if (moodName === 'Epic') {
+      // Dense: driving bass every beat, fast arp 8ths, heavy chords on pad
+      pushNote(0, bt,       1.0, pickNote(sc, oct - 1),   110);
+      pushNote(0, bt + 1,   1.0, pickNote(sc, oct - 1),   100);
+      pushNote(0, bt + 2,   1.0, pickNote(sc, oct - 1),   108);
+      pushNote(0, bt + 3,   1.0, pickNote(sc, oct - 1),   95);
+      // 8th-note arp
+      for (let s = 0; s < 8; s++) {
+        pushNote(1, bt + s * 0.5, 0.4, pickNote(sc, oct + 1), 75 + Math.random()*25);
+      }
+      // Power chord pad every 2 beats
+      if (n > 2) {
+        pushNote(2, bt,       2.0, pickNote(sc, oct,  0), 85);
+        pushNote(2, bt,       2.0, pickNote(sc, oct,  7), 80);
+        pushNote(2, bt + 2,   2.0, pickNote(sc, oct,  0), 80);
+        pushNote(2, bt + 2,   2.0, pickNote(sc, oct,  7), 75);
+      }
+      // Lead fills every other bar
+      if (n > 3 && bar % 2 === 0) {
+        [0, 0.5, 1, 1.5].forEach(b => pushNote(3, bt + b, 0.4, pickNote(sc, oct + 2), 90 + Math.random()*20));
+      }
+
+    } else if (moodName === 'Dark') {
+      // Minor: bass drone on 1, dissonant off-beats, brooding melody
+      pushNote(0, bt,       4.0, `C${oct}`,              105);  // root drone
+      if (Math.random() > 0.5) pushNote(0, bt + 2, 1.0, `G${oct - 1}`, 90);
+      // Eerie arp on off-beats (8th-triplet feel)
+      [0.33, 1.0, 1.66, 2.33, 3.0, 3.66].forEach(b => {
+        if (Math.random() > 0.35) pushNote(1, bt + b, 0.3, pickNote(sc, oct + 1), 50 + Math.random()*30);
+      });
+      // Slow brooding melody
+      if (n > 2) {
+        const darkPitches = [0, 2]; // choose beat positions
+        darkPitches.forEach(b => {
+          if (Math.random() > 0.3) pushNote(2, bt + b, 1.5, pickNote(sc, oct + 1), 65 + Math.random()*20);
+        });
+      }
+      // Heavy pad held note every bar
+      if (n > 3) pushNote(3, bt, 4.0, pickNote(sc, oct, 3), 55 + Math.random()*15);
+
+    } else if (moodName === 'Dreamy') {
+      // Very sparse, held pads, floaty high melody
+      pushNote(0, bt, 4.0, pickNote(sc, oct), 50 + Math.random()*20);  // long bass/pad
+      // Floating melody, 1-2 notes per bar
+      const dreamBeats = [0, 1.5, 3].filter(() => Math.random() > 0.5);
+      dreamBeats.forEach(b => pushNote(1, bt + b, 1.0, pickNote(sc, oct + 2), 45 + Math.random()*25));
+      // Pad cluster every 2 bars
+      if (n > 2 && bar % 2 === 0) {
+        pushNote(2, bt, 8.0, pickNote(sc, oct + 1, 0), 40);
+        pushNote(2, bt, 8.0, pickNote(sc, oct + 1, 7), 35);
+      }
+
+    } else if (moodName === 'Happy') {
+      // Upbeat pentatonic: bouncy bass, staccato melody, no dissonance
+      pushNote(0, bt,     1.0, pickNote(sc, oct),       95);
+      pushNote(0, bt + 2, 1.0, pickNote(sc, oct),       88);
+      [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach(b => {
+        if (Math.random() > 0.42) pushNote(1, bt + b, 0.4, pickNote(sc, oct + 1), 70 + Math.random()*25);
+      });
+      if (n > 2 && bar % 2 === 0) pushNote(2, bt, 2.0, pickNote(sc, oct + 1, 4), 60 + Math.random()*15);
+
+    } else if (moodName === 'Groovy') {
+      // Syncopated bass on 1 & "and of 2", funky ghost notes, offbeat accents
+      pushNote(0, bt,       0.5, pickNote(sc, oct),       115); // beat 1
+      pushNote(0, bt + 0.5, 0.25, pickNote(sc, oct),      65);  // ghost
+      pushNote(0, bt + 1.5, 0.5, pickNote(sc, oct),       100); // & of 2
+      pushNote(0, bt + 2,   0.5, pickNote(sc, oct),       88);
+      pushNote(0, bt + 3.5, 0.5, pickNote(sc, oct),       105); // & of 4
+      // Funky 16th-note arp with accent on beat 3
+      [0, 0.25, 0.75, 1, 1.5, 2, 2.25, 2.75, 3, 3.25, 3.75].forEach(b => {
+        const vel = (b === 2) ? 100 : 55 + Math.random()*25;
+        if (Math.random() > 0.3) pushNote(1, bt + b, 0.2, pickNote(sc, oct + 1), vel);
+      });
+      if (n > 2 && bar % 2 === 1) pushNote(2, bt, 2.0, pickNote(sc, oct + 1), 70 + Math.random()*15);
+
+    } else if (moodName === 'Ambient') {
+      // Ultra-sparse: very long notes, almost no rhythm
+      if (bar % 4 === 0) {
+        // New chord block every 4 bars
+        pushNote(0, bt, 8.0, `C${oct}`,                    45 + Math.random()*15);
+        if (n > 1) pushNote(1, bt, 8.0, pickNote(sc, oct + 1, 0), 35 + Math.random()*15);
+        if (n > 2) pushNote(2, bt, 8.0, pickNote(sc, oct + 1, 4), 30 + Math.random()*10);
+        if (n > 3) pushNote(3, bt, 8.0, pickNote(sc, oct + 1, 7), 28 + Math.random()*10);
+      }
+      // Occasional single floating note
+      if (Math.random() > 0.72) {
+        const randBeat = Math.floor(Math.random() * 4);
+        pushNote(1, bt + randBeat, 1.5, pickNote(sc, oct + 2), 35 + Math.random()*20);
+      }
+
+    } else if (moodName === 'Retro') {
+      // 8-bit / chiptune feel: staccato 8th bass, arpeggiated chords, short notes
+      [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach((b, idx) => {
+        // Alternating root and fifth bass pattern
+        const bassNote = (idx % 4 < 2) ? `C${oct}` : `G${oct}`;
+        pushNote(0, bt + b, 0.4, bassNote, 90 + (idx % 2 === 0 ? 15 : 0));
+      });
+      // Fast chord arp (up): 16th notes
+      const chordTones = [sc[0], sc[2], sc[4] || sc[3], sc[0]];
+      for (let s = 0; s < 8; s++) {
+        const tone = chordTones[s % chordTones.length];
+        const name = NOTE_NAMES[tone % 12];
+        pushNote(1, bt + s * 0.5, 0.35, `${name}${oct + 2}`, 80 + (s % 4 === 0 ? 20 : 0));
+      }
+      // Short melody hits on beats 1 and 3
+      if (n > 2) {
+        pushNote(2, bt,     0.25, pickNote(sc, oct + 2), 100);
+        pushNote(2, bt + 2, 0.25, pickNote(sc, oct + 2), 95);
+        if (Math.random() > 0.5) pushNote(2, bt + 3.5, 0.25, pickNote(sc, oct + 2), 90);
+      }
+
+    } else if (moodName === 'Intense') {
+      // Maximum density: 16th-note bass, furious arp, no space
+      for (let s = 0; s < 16; s++) {
+        pushNote(0, bt + s * 0.25, 0.2, pickNote(sc, oct - 1), 90 + (s % 4 === 0 ? 25 : 0));
+      }
+      for (let s = 0; s < 16; s++) {
+        pushNote(1, bt + s * 0.25, 0.2, pickNote(sc, oct + 1), 70 + Math.random()*30);
+      }
+      if (n > 2) {
+        [0, 1, 2, 3].forEach(b => pushNote(2, bt + b, 0.9, pickNote(sc, oct), 100 + Math.random()*15));
+      }
+      if (n > 3) {
+        [0, 0.5, 1.5, 2, 3, 3.5].forEach(b => pushNote(3, bt + b, 0.4, pickNote(sc, oct + 2), 80 + Math.random()*25));
+      }
     }
   }
-  
+
   drawGrid();
   if (APP_STATE.isPlaying) scheduleNotes();
 }
+
 
 // Global UI Toast banner helper
 function showToast(msg) {
