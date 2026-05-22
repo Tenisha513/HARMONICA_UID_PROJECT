@@ -1,8 +1,8 @@
-# Harmonica
+# Harmonica — A Mood-Assisted Web Music Composer
 
 A browser-based music studio you can open without installing anything. Compose on a piano roll, mix tracks, try starter templates, and let the mood generator sketch ideas for you — all in a dark, studio-style interface.
 
-Built as a UID (User Interface Design) project. Everything runs in the browser.
+Built as a UID (User Interface Design) project. Everything runs in the browser: no server, no account database, no cloud sync.
 
 ---
 
@@ -16,8 +16,9 @@ Built as a UID (User Interface Design) project. Everything runs in the browser.
 - Piano roll: click to add notes, right-click to remove, select to edit in the side panel
 - Tracks mixer: volume, pan, mute, solo, add/delete tracks
 - Five **templates** in the left sidebar (below your track list): EDM Beat, Lofi Beat, Cinematic Theme, Horror Ambience, Piano Melody
-- **AI Mood Composer** in the footer: nine moods plus a text prompt and Generate button
-- Live audio visualizers (frequency bars, circular spectrum, waveform) with teal-to-beige gradients
+- **AI Mood Composer** in the footer: twelve moods plus a text prompt and Generate button
+- Live audio visualizers (frequency bars, always-vibrating circular spectrum, smoothed waveform) with teal-to-beige gradients
+- **Mobile responsive**: scrollable vertical layout on phones with horizontal mood pill strip
 - Virtual keyboard, BPM/key/scale controls, save, reset, and JSON export
 
 **Account** — Profile and security UI (simulated — nothing is sent to a server).
@@ -28,7 +29,7 @@ There is also a separate `portfolio/index.html` train animation page if you want
 
 ---
 
-## Live at:
+## LIVE AT:
 > https://tenisha5132.github.io/HARMONICA_UID_PROJECT/studio.html
 
 **Demo login**
@@ -78,7 +79,7 @@ Designed to stay inside the window — it will not eat the whole screen.
 | Transport | Timer, play, stop, rewind, record |
 | AI Mood Composer | Prompt, Generate, scrollable mood pills |
 
-On smaller screens the footer stacks and scrolls if needed. Scroll inside the mood area to see all nine moods.
+On phones the page scrolls vertically instead of locking to the viewport. The sidebar sections (tracks, templates) get compact scroll areas, and the mood pills become a horizontal swipe strip.
 
 ---
 
@@ -96,21 +97,24 @@ Click a template to replace the current arrangement. The project title updates t
 
 ---
 
-## AI Mood Composer (nine moods)
+## AI Mood Composer (twelve moods)
 
-Pick a mood, then hit **Generate**. This is a built-in pattern engine — not a real AI API — but it fills the grid quickly with something that fits the vibe.
+Pick a mood, then hit **Generate**. This is a built-in pattern engine — not a real AI API — but it fills the grid quickly with something that fits the vibe. Each mood has its own unique generation strategy: different rhythms, note densities, syncopation patterns, and instrument assignments.
 
 | Mood | BPM | Feel |
 |------|-----|------|
 | Chill | 88 | Relaxed, sparse |
 | Epic | 135 | Big and dense |
-| Dark | 72 | Moody, minor |
-| Dreamy | 95 | Soft pads |
+| Dark | 72 | Moody, minor, triplet-feel arps |
+| Dreamy | 95 | Soft pads, floaty |
 | Happy | 112 | Bright, upbeat |
-| Groovy | 105 | Funk-ish groove |
-| Ambient | 68 | Airy, minimal |
-| Retro | 118 | Synthwave energy |
-| Intense | 152 | Fast and busy |
+| Groovy | 105 | Syncopated funk with ghost notes |
+| Ambient | 68 | Airy, ultra-minimal, long sustains |
+| Retro | 118 | 8-bit chiptune staccato |
+| Intense | 152 | 16th-note walls of sound |
+| EDM | 128 | Four-on-the-floor, supersaw arps |
+| Lofi | 80 | Swung jazz chords, vinyl-gap melody |
+| Cinematic | 60 | Orchestral swells, crescendo build |
 
 You can also type a theme in the prompt box (for your own notes — generation still uses the selected mood).
 
