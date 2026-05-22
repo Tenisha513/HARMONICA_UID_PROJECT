@@ -127,6 +127,36 @@ option {
   }
 }
 
+/* Studio mobile layout — vertical scroll with compact sections */
+@media screen and (max-width: 767px) {
+  /* Sidebar: auto-height, compact sections */
+  aside #trackList {
+    max-height: 140px;
+    overflow-y: auto;
+  }
+  aside #templatesList {
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  /* Virtual keyboard: smaller on mobile */
+  #virtualKeyboard {
+    padding: 0.5rem 0.75rem;
+  }
+  #virtualKeyboard .relative.w-full {
+    height: 64px !important;
+  }
+  #virtualKeyboard .white-key {
+    font-size: 8px !important;
+  }
+  #virtualKeyboard [data-note] {
+    font-size: 7px !important;
+  }
+  /* Footer transport: tighter spacing */
+  footer .ai-mood-panel {
+    max-height: none;
+  }
+}
+
 /* Case 2: Tablets (Medium screens) */
 @media screen and (min-width: 481px) and (max-width: 768px) {
   body {
