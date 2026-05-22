@@ -47,7 +47,7 @@ if (window.currentProjectId) {
 // ----------------------
 
 const TOTAL_KEYS = 24;
-const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 // Map flat names (Bb, Eb) to sharp names used on the grid
 const PITCH_ALIASES = { Bb: 'A#', Db: 'C#', Eb: 'D#', Gb: 'F#', Ab: 'G#' };
@@ -91,7 +91,7 @@ function setupAudio() {
       pan: t.pan,
       mute: t.mute
     }).connect(masterBus);
-    
+
     APP_STATE.channels[t.id] = channel;
 
     // Load instruments
@@ -104,26 +104,26 @@ function setupAudio() {
       synth = new Tone.AMSynth().connect(channel);
     }
     APP_STATE.synths[t.id] = synth;
-    
+
     // Connect dynamic effects send paths
     updateTrackEffects(t.id);
   });
-  
+
   Tone.Transport.bpm.value = APP_STATE.bpm;
 }
 
 function updateTrackEffects(trackId) {
   const channel = APP_STATE.channels[trackId];
   if (!channel) return;
-  
+
   const track = APP_STATE.tracks.find(t => t.id === trackId);
   if (!track) return;
-  
+
   // Disconnect from send paths
   channel.disconnect();
   // Always connect back directly to standard master output
   channel.connect(masterBus);
-  
+
   // Conditionally hook sends
   if (track.effects.Reverb) {
     channel.connect(globalEffects.Reverb);
@@ -155,11 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (titleEl) titleEl.textContent = storedPrj;
   }
 
-  let isAudioInitialized = false;
+  window._audioInitialized = window._audioInitialized || false;
   // Audio start trigger on initial click interaction
   window.addEventListener("click", async () => {
-    if (!isAudioInitialized) {
-      isAudioInitialized = true;
+    if (!window._audioInitialized) {
+      window._audioInitialized = true;
       if (Tone.context.state !== 'running') {
         await Tone.start();
       }
@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addTrackModalContent = document.getElementById("addTrackModalContent");
   const newTrackNameInput = document.getElementById("newTrackName");
   const newTrackTypeSelect = document.getElementById("newTrackType");
-  
+
   function closeAddTrackModal() {
     addTrackModal.classList.remove("opacity-100");
     addTrackModalContent.classList.remove("scale-100");
@@ -203,23 +203,23 @@ document.addEventListener("DOMContentLoaded", () => {
     void addTrackModal.offsetWidth;
     addTrackModal.classList.add("opacity-100");
     addTrackModalContent.classList.add("scale-100");
-    
+
     newTrackNameInput.value = `Track ${APP_STATE.tracks.length + 1}`;
     newTrackNameInput.focus();
     newTrackNameInput.select();
   });
 
   document.getElementById("cancelAddTrack").addEventListener("click", closeAddTrackModal);
-  
+
   document.getElementById("confirmAddTrack").addEventListener("click", () => {
     const name = newTrackNameInput.value.trim() || `Track ${APP_STATE.tracks.length + 1}`;
     const synthType = newTrackTypeSelect.value;
-    
+
     closeAddTrackModal();
 
     const newId = APP_STATE.tracks.length > 0 ? Math.max(...APP_STATE.tracks.map(t => t.id)) + 1 : 0;
     const colors = ["#ffc174", "#d0bcff", "#7fd0ff", "#ffb4ab", "#ffddb8"];
-    
+
     const newTrack = {
       id: newId,
       name: name.substring(0, 20),
@@ -231,9 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
       pan: 0,
       effects: { Reverb: false, Delay: false, Chorus: false }
     };
-    
+
     APP_STATE.tracks.push(newTrack);
-    
+
     // Wire synthesis channel routing
     if (Tone.context.state === 'running') {
       const channel = new Tone.Channel({
@@ -242,16 +242,16 @@ document.addEventListener("DOMContentLoaded", () => {
         mute: false
       }).connect(masterBus);
       APP_STATE.channels[newId] = channel;
-      
+
       let synth;
       if (synthType === 'PolySynth') synth = new Tone.PolySynth(Tone.Synth).connect(channel);
       else if (synthType === 'MonoSynth') synth = new Tone.MonoSynth().connect(channel);
       else if (synthType === 'AMSynth') synth = new Tone.AMSynth().connect(channel);
-      
+
       APP_STATE.synths[newId] = synth;
       updateTrackEffects(newId);
     }
-    
+
     renderTracks();
     drawGrid();
     showToast(`✦ Added ${newTrack.name}`);
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
   propVolume.addEventListener("input", (e) => {
     const dbVal = parseFloat(e.target.value);
     volumeVal.textContent = dbVal === -60 ? "-∞ dB" : `${dbVal.toFixed(1)} dB`;
-    
+
     const activeTrack = APP_STATE.tracks.find(t => t.id === APP_STATE.activeTrackId);
     if (activeTrack) {
       activeTrack.vol = dbVal;
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
   propPan.addEventListener("input", (e) => {
     const val = parseFloat(e.target.value);
     panVal.textContent = val === 0 ? "Center" : (val < 0 ? `L ${Math.abs(val).toFixed(1)}` : `R ${val.toFixed(1)}`);
-    
+
     const activeTrack = APP_STATE.tracks.find(t => t.id === APP_STATE.activeTrackId);
     if (activeTrack) {
       activeTrack.pan = val;
@@ -307,13 +307,13 @@ document.addEventListener("DOMContentLoaded", () => {
   ["Reverb", "Delay", "Chorus", "Equalizer"].forEach(eff => {
     const btn = document.getElementById(`eff${eff}`);
     const indicator = document.getElementById(`eff${eff}Indicator`);
-    
+
     if (btn) {
       btn.addEventListener("click", () => {
         const track = APP_STATE.tracks.find(t => t.id === APP_STATE.activeTrackId);
         if (track) {
           track.effects[eff] = !track.effects[eff];
-          
+
           // Toggle styling
           if (track.effects[eff]) {
             indicator.classList.remove("bg-transparent");
@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
             indicator.classList.add("bg-transparent");
             indicator.classList.remove("bg-primary");
           }
-          
+
           updateTrackEffects(track.id);
           updateSignalChainUI(track);
         }
@@ -344,7 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Synchronized BPM Input Handlers (Mobile & Desktop)
   const bpmMobile = document.getElementById("bpmInput");
   const bpmDesktop = document.getElementById("bpmInputDesktop");
-  
+
   function updateBpm(newBpm) {
     newBpm = Math.max(40, Math.min(240, newBpm));
     APP_STATE.bpm = newBpm;
@@ -352,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (bpmMobile) bpmMobile.value = newBpm;
     if (bpmDesktop) bpmDesktop.value = newBpm;
   }
-  
+
   if (bpmMobile) {
     bpmMobile.addEventListener("change", (e) => updateBpm(parseInt(e.target.value)));
   }
@@ -419,15 +419,15 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("Please choose a theme template first");
       return;
     }
-    
+
     if (APP_STATE.isPlaying) {
       stopPlay();
     }
-    
+
     const shimmer = document.getElementById("loadingShimmer");
     shimmer.classList.remove("hidden");
     shimmer.classList.add("flex");
-    
+
     setTimeout(() => {
       generateMoodMusic(APP_STATE.mood);
       shimmer.classList.add("hidden");
@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renameInput = document.getElementById("renameInput");
   const activeProjectTitle = document.getElementById("activeProjectTitle");
   const activeProjectTitle2 = document.getElementById("activeProjectTitle2");
-  
+
   function closeRenameModal() {
     renameModal.classList.remove("opacity-100");
     renameModalContent.classList.remove("scale-100");
@@ -455,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
     void renameModal.offsetWidth;
     renameModal.classList.add("opacity-100");
     renameModalContent.classList.add("scale-100");
-    
+
     renameInput.value = APP_STATE.activeProject;
     renameInput.focus();
     renameInput.select();
@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("cancelRename").addEventListener("click", closeRenameModal);
-  
+
   document.getElementById("confirmRename").addEventListener("click", () => {
     const newName = renameInput.value.trim() || "Untitled Project";
     APP_STATE.activeProject = newName;
@@ -486,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const indicator = document.getElementById("saveStateIndicator");
     indicator.textContent = "Saving...";
     indicator.classList.add("text-primary");
-    
+
     const projectData = {
       id: window.currentProjectId,
       title: APP_STATE.activeProject,
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tracks: APP_STATE.tracks,
       modifiedAt: new Date().toISOString()
     };
-    
+
     let projects = JSON.parse(localStorage.getItem('harmonica_projects') || localStorage.getItem('harmonic_projects') || localStorage.getItem('resonance_projects') || '[]');
     const existingIndex = projects.findIndex(p => p.id === window.currentProjectId);
     if (existingIndex > -1) {
@@ -504,7 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
       projects.push(projectData);
     }
     localStorage.setItem('harmonica_projects', JSON.stringify(projects));
-    
+
     setTimeout(() => {
       indicator.textContent = "Saved Just Now";
       indicator.classList.remove("text-primary");
@@ -514,13 +514,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Reset Template Custom Modal
   const resetModal = document.getElementById("resetModal");
   const resetModalContent = document.getElementById("resetModalContent");
-  
+
   function closeResetModal() {
     resetModal.classList.remove("opacity-100");
     resetModalContent.classList.remove("scale-100");
     setTimeout(() => resetModal.classList.add("hidden"), 300);
   }
-  
+
   const btnReset = document.getElementById("btnReset");
   if (btnReset) {
     btnReset.addEventListener("click", () => {
@@ -533,32 +533,32 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("cancelReset").addEventListener("click", closeResetModal);
-  
+
   document.getElementById("confirmReset").addEventListener("click", () => {
-      closeResetModal();
-      
-      APP_STATE.notes = [];
-      APP_STATE.noteIdCounter = 0;
-      
-      // Keep only default track structure without nodes, then reinit
-      const track1 = APP_STATE.tracks[0] || { id: 0, name: 'Piano', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: 0, pan: 0, effects: { Reverb: true, Delay: false, Chorus: false, Equalizer: false } };
-      
-      APP_STATE.tracks.forEach(t => {
-        if (APP_STATE.channels[t.id]) APP_STATE.channels[t.id].dispose();
-        if (APP_STATE.synths[t.id]) APP_STATE.synths[t.id].dispose();
-      });
-      
-      APP_STATE.channels = {};
-      APP_STATE.synths = {};
-      APP_STATE.tracks = [track1];
-      APP_STATE.activeTrackId = track1.id;
-      APP_STATE.selectedNoteId = null;
-      
-      setupAudio();
-      renderTracks();
-      drawGrid();
-      updatePropertiesPanel();
-      showToast("Project has been reset");
+    closeResetModal();
+
+    APP_STATE.notes = [];
+    APP_STATE.noteIdCounter = 0;
+
+    // Keep only default track structure without nodes, then reinit
+    const track1 = APP_STATE.tracks[0] || { id: 0, name: 'Piano', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: 0, pan: 0, effects: { Reverb: true, Delay: false, Chorus: false, Equalizer: false } };
+
+    APP_STATE.tracks.forEach(t => {
+      if (APP_STATE.channels[t.id]) APP_STATE.channels[t.id].dispose();
+      if (APP_STATE.synths[t.id]) APP_STATE.synths[t.id].dispose();
+    });
+
+    APP_STATE.channels = {};
+    APP_STATE.synths = {};
+    APP_STATE.tracks = [track1];
+    APP_STATE.activeTrackId = track1.id;
+    APP_STATE.selectedNoteId = null;
+
+    setupAudio();
+    renderTracks();
+    drawGrid();
+    updatePropertiesPanel();
+    showToast("Project has been reset");
   });
 
   // Master Volume Control
@@ -642,7 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gridCanvas.addEventListener("mousemove", handleCanvasMouseMove);
     gridCanvas.addEventListener("contextmenu", e => e.preventDefault());
   }
-  
+
   window.addEventListener("mouseup", () => {
     isDragging = false;
     dragNote = null;
@@ -653,28 +653,28 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTracks();
   renderPianoKeys();
   drawGrid();
-  
+
   // Set UI elements based on loaded state
   const loadedTitleEl = document.getElementById("activeProjectTitle");
-  if(loadedTitleEl) loadedTitleEl.textContent = APP_STATE.activeProject;
+  if (loadedTitleEl) loadedTitleEl.textContent = APP_STATE.activeProject;
   const loadedTitleEl2 = document.getElementById("activeProjectTitle2");
-  if(loadedTitleEl2) loadedTitleEl2.textContent = APP_STATE.activeProject;
-  
+  if (loadedTitleEl2) loadedTitleEl2.textContent = APP_STATE.activeProject;
+
   const loadedBpmEl = document.getElementById("bpmInput");
-  if(loadedBpmEl) loadedBpmEl.value = APP_STATE.bpm;
+  if (loadedBpmEl) loadedBpmEl.value = APP_STATE.bpm;
   const loadedBpmDesktopEl = document.getElementById("bpmInputDesktop");
-  if(loadedBpmDesktopEl) loadedBpmDesktopEl.value = APP_STATE.bpm;
+  if (loadedBpmDesktopEl) loadedBpmDesktopEl.value = APP_STATE.bpm;
 
   // Initialize key & scale selections from state
   const loadedKeyMobile = document.getElementById("keySelectMobile");
-  if(loadedKeyMobile) loadedKeyMobile.value = APP_STATE.key || "C";
+  if (loadedKeyMobile) loadedKeyMobile.value = APP_STATE.key || "C";
   const loadedKeyDesktop = document.getElementById("keySelect");
-  if(loadedKeyDesktop) loadedKeyDesktop.value = APP_STATE.key || "C";
+  if (loadedKeyDesktop) loadedKeyDesktop.value = APP_STATE.key || "C";
   const loadedScaleMobile = document.getElementById("scaleSelectMobile");
-  if(loadedScaleMobile) loadedScaleMobile.value = APP_STATE.scale || "Major";
+  if (loadedScaleMobile) loadedScaleMobile.value = APP_STATE.scale || "Major";
   const loadedScaleDesktop = document.getElementById("scaleSelect");
-  if(loadedScaleDesktop) loadedScaleDesktop.value = APP_STATE.scale || "Major";
-  
+  if (loadedScaleDesktop) loadedScaleDesktop.value = APP_STATE.scale || "Major";
+
   // Set up horizontal scroll coordinate mapping
   gridContainer.addEventListener("scroll", () => {
     document.getElementById("rulerCanvas").style.left = `-${gridContainer.scrollLeft}px`;
@@ -688,14 +688,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const playVirtualKey = (keyEl) => {
       const pitch = keyEl.dataset.note;
       if (!pitch) return;
-      
+
       // Determine duration based on sustain checkbox state
       const isSustain = sustainToggle && sustainToggle.checked;
       const duration = isSustain ? "1n" : "8n";
-      
+
       // Trigger note on active track synth
       playNoteAudio(APP_STATE.activeTrackId, pitch, duration, Tone.now());
-      
+
       // Add active visual state
       keyEl.classList.add("active-key");
     };
@@ -781,14 +781,13 @@ function renderTracks() {
 
   APP_STATE.tracks.forEach(t => {
     const div = document.createElement('div');
-    div.className = `px-4 py-3 mx-2 rounded border transition-all flex items-center justify-between group cursor-pointer ${
-      t.id === APP_STATE.activeTrackId 
-        ? 'bg-primary/10 border-primary text-primary shadow-[0_0_8px_rgba(255,193,116,0.1)]' 
+    div.className = `px-4 py-3 mx-2 rounded border transition-all flex items-center justify-between group cursor-pointer ${t.id === APP_STATE.activeTrackId
+        ? 'bg-primary/10 border-primary text-primary shadow-[0_0_8px_rgba(255,193,116,0.1)]'
         : 'bg-surface-container border-outline-variant/10 text-on-surface-variant hover:bg-surface-container-high'
-    }`;
-    
+      }`;
+
     div.onclick = () => selectTrack(t.id);
-    
+
     div.innerHTML = `
       <div class="flex items-center gap-3">
         <span class="material-symbols-outlined text-[20px] ${t.id === APP_STATE.activeTrackId ? 'text-primary' : 'text-on-surface-variant/80'}" style="font-variation-settings: 'FILL' 1;">
@@ -803,16 +802,14 @@ function renderTracks() {
         <button class="w-7 h-7 flex items-center justify-center rounded font-label-mono text-[10px] shadow-sm border transition-all hover:bg-error/20 hover:text-error hover:border-error/50 text-on-surface-variant bg-surface-container-highest border-outline-variant/20" onclick="event.stopPropagation(); deleteTrack(${t.id})" title="Delete Track">
           <span class="material-symbols-outlined text-[14px]">delete</span>
         </button>
-        <button class="w-7 h-7 flex items-center justify-center rounded font-label-mono text-[10px] shadow-sm border transition-all ${
-          t.mute 
-            ? 'bg-error text-on-error border-error' 
-            : 'bg-surface-container-highest border-outline-variant/20 hover:border-outline-variant text-on-surface-variant'
-        }" onclick="event.stopPropagation(); toggleMute(${t.id})">M</button>
-        <button class="w-7 h-7 flex items-center justify-center rounded font-label-mono text-[10px] shadow-sm border transition-all ${
-          t.solo 
-            ? 'bg-tertiary text-on-tertiary border-tertiary' 
-            : 'bg-surface-container-highest border-outline-variant/20 hover:border-outline-variant text-on-surface-variant'
-        }" onclick="event.stopPropagation(); toggleSolo(${t.id})">S</button>
+        <button class="w-7 h-7 flex items-center justify-center rounded font-label-mono text-[10px] shadow-sm border transition-all ${t.mute
+        ? 'bg-error text-on-error border-error'
+        : 'bg-surface-container-highest border-outline-variant/20 hover:border-outline-variant text-on-surface-variant'
+      }" onclick="event.stopPropagation(); toggleMute(${t.id})">M</button>
+        <button class="w-7 h-7 flex items-center justify-center rounded font-label-mono text-[10px] shadow-sm border transition-all ${t.solo
+        ? 'bg-tertiary text-on-tertiary border-tertiary'
+        : 'bg-surface-container-highest border-outline-variant/20 hover:border-outline-variant text-on-surface-variant'
+      }" onclick="event.stopPropagation(); toggleSolo(${t.id})">S</button>
       </div>
     `;
     list.appendChild(div);
@@ -828,7 +825,7 @@ function renderPianoKeys() {
     const noteIndex = i % 12;
     const noteName = NOTE_NAMES[noteIndex];
     const isBlack = noteName.includes('#');
-    
+
     if (isBlack) {
       html += `
         <div class="w-full bg-[#1b1b1d] border-b border-background flex items-center justify-end pr-2 text-[8px] font-label-mono text-on-surface-variant/60 font-semibold relative select-none" style="height: ${APP_STATE.gridConfig.rowHeight}px;">
@@ -880,15 +877,15 @@ function drawGrid() {
 
   // 2. Draw grid background & gridlines
   ctx.clearRect(0, 0, totalWidth, totalHeight);
-  
+
   for (let i = 0; i < TOTAL_KEYS; i++) {
     const y = i * c.rowHeight;
     const noteIndex = (TOTAL_KEYS - 1 - i) % 12;
     const isBlack = NOTE_NAMES[noteIndex].includes('#');
-    
+
     ctx.fillStyle = isBlack ? '#171719' : '#1b1b1d';
     ctx.fillRect(0, y, totalWidth, c.rowHeight);
-    
+
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
     ctx.fillRect(0, y, totalWidth, 1);
   }
@@ -897,7 +894,7 @@ function drawGrid() {
     const x = col * c.cellWidth;
     const isBar = col % (c.beatsPerBar * c.subdivisions) === 0;
     const isBeat = col % c.subdivisions === 0;
-    
+
     ctx.fillStyle = isBar ? 'rgba(255,255,255,0.08)' : (isBeat ? 'rgba(255,255,255,0.03)' : 'transparent');
     if (ctx.fillStyle !== 'transparent') {
       ctx.fillRect(x, 0, 1, totalHeight);
@@ -924,7 +921,7 @@ function drawGrid() {
     ctx.globalAlpha = isActiveTrack ? 1 : 0.28;
     ctx.shadowColor = isSelected ? '#ffffff' : baseColor;
     ctx.shadowBlur = isSelected ? 12 : (isActiveTrack ? 6 : 2);
-    
+
     const grad = ctx.createLinearGradient(x, y, x, y + height);
     if (isSelected) {
       grad.addColorStop(0, '#ffffff');
@@ -934,7 +931,7 @@ function drawGrid() {
       grad.addColorStop(1, 'rgba(0,0,0,0.5)');
     }
     ctx.fillStyle = grad;
-    
+
     roundRect(ctx, x + 1, y + 1, width - 2, height, 4);
     ctx.fill();
     ctx.restore();
@@ -1009,14 +1006,14 @@ function deleteTrack(id) {
     return;
   }
   if (APP_STATE.isPlaying) stopPlay();
-  
+
   // Dispose audio nodes to prevent memory leak and sound playing
   const channel = APP_STATE.channels[id];
   if (channel) {
     channel.dispose();
     delete APP_STATE.channels[id];
   }
-  
+
   const synth = APP_STATE.synths[id];
   if (synth) {
     synth.dispose();
@@ -1024,16 +1021,16 @@ function deleteTrack(id) {
   }
 
   APP_STATE.tracks = APP_STATE.tracks.filter(t => t.id !== id);
-  
+
   // Delete all notes on this track
   APP_STATE.notes = APP_STATE.notes.filter(n => n.trackId !== id);
-  
+
   if (APP_STATE.activeTrackId === id) {
     APP_STATE.activeTrackId = APP_STATE.tracks[0].id;
     APP_STATE.selectedNoteId = null;
     updatePropertiesPanel();
   }
-  
+
   renderTracks();
   drawGrid();
   showToast("✦ Track Deleted");
@@ -1050,13 +1047,13 @@ function updatePropertiesPanel() {
     inspectorIcon.innerText = 'music_note';
     trackTab.classList.add("hidden");
     noteTab.classList.remove("hidden");
-    
+
     const note = APP_STATE.notes.find(n => n.id === APP_STATE.selectedNoteId);
     if (note) {
       document.getElementById('propPitch').innerText = note.pitch;
       document.getElementById('propVelocity').value = note.velocity;
       document.getElementById('velocityVal').textContent = note.velocity;
-      
+
       const noteDur = note.duration;
       const selectVal = noteDur === 0.25 ? "16n" : (noteDur === 0.5 ? "8n" : (noteDur === 1.0 ? "4n" : (noteDur === 2.0 ? "2n" : "1n")));
       document.getElementById("propDuration").value = selectVal;
@@ -1064,18 +1061,18 @@ function updatePropertiesPanel() {
   } else {
     trackTab.classList.remove("hidden");
     noteTab.classList.add("hidden");
-    
+
     const track = APP_STATE.tracks.find(t => t.id === APP_STATE.activeTrackId);
     if (track) {
       header.innerText = track.name;
       inspectorIcon.innerText = track.synthType === 'MonoSynth' ? 'graphic_eq' : 'piano';
-      
+
       document.getElementById('propVolume').value = track.vol;
       document.getElementById('volumeVal').textContent = track.vol === -60 ? "-∞ dB" : `${track.vol.toFixed(1)} dB`;
-      
+
       document.getElementById('propPan').value = track.pan;
       document.getElementById('panVal').textContent = track.pan === 0 ? "Center" : (track.pan < 0 ? `L ${Math.abs(track.pan).toFixed(1)}` : `R ${track.pan.toFixed(1)}`);
-      
+
       // Update send button state displays
       ["Reverb", "Delay", "Chorus"].forEach(eff => {
         const indicator = document.getElementById(`eff${eff}Indicator`);
@@ -1089,7 +1086,7 @@ function updatePropertiesPanel() {
           }
         }
       });
-      
+
       updateSignalChainUI(track);
     }
   }
@@ -1098,12 +1095,12 @@ function updatePropertiesPanel() {
 function updateSignalChainUI(track) {
   const chain = document.getElementById("effectChain");
   if (!chain) return;
-  
+
   const activeSends = [];
   if (track.effects.Reverb) activeSends.push("Reverb");
   if (track.effects.Delay) activeSends.push("Echo");
   if (track.effects.Chorus) activeSends.push("Chorus");
-  
+
   if (activeSends.length === 0) {
     chain.innerHTML = `${track.name} &rarr; Master Out`;
   } else {
@@ -1170,9 +1167,9 @@ function handleCanvasMouseDown(e) {
     const selectEl = document.getElementById("propDuration");
     const val = selectEl ? selectEl.value : "4n";
     const durBeats = val === "16n" ? 0.25 : (val === "8n" ? 0.5 : (val === "4n" ? 1.0 : (val === "2n" ? 2.0 : 4.0)));
-    
+
     const newNote = {
-      id: APP_STATE.noteIdCounter++, 
+      id: APP_STATE.noteIdCounter++,
       trackId: APP_STATE.activeTrackId,
       time,
       duration: durBeats,
@@ -1181,12 +1178,12 @@ function handleCanvasMouseDown(e) {
     };
     APP_STATE.notes.push(newNote);
     APP_STATE.selectedNoteId = newNote.id;
-    
+
     // Preview single pitch triggers
     if (Tone.context.state === 'running') {
       playNoteAudio(APP_STATE.activeTrackId, pitch, '8n', Tone.now());
     }
-    
+
     updatePropertiesPanel();
     drawGrid();
   }
@@ -1198,7 +1195,7 @@ function handleCanvasMouseMove(e) {
   const c = APP_STATE.gridConfig;
   const col = Math.floor(coords.x / c.cellWidth);
   const row = Math.floor(coords.y / c.rowHeight);
-  
+
   if (dragType === 'move') {
     dragNote.time = Math.max(0, col / c.subdivisions);
     const pitchIdx = TOTAL_KEYS - 1 - row;
@@ -1210,7 +1207,7 @@ function handleCanvasMouseMove(e) {
     const newDurCols = Math.max(1, col - startCol + 1);
     dragNote.duration = newDurCols / c.subdivisions;
   }
-  
+
   if (APP_STATE.isPlaying) stopPlay();
   drawGrid();
   if (APP_STATE.selectedNoteId === dragNote.id) {
@@ -1221,9 +1218,9 @@ function handleCanvasMouseMove(e) {
 // 4. Transport Playback Scheduling Engine
 function togglePlay() {
   if (Tone.context.state !== 'running') return;
-  
+
   const playIcon = document.getElementById("playIcon");
-  
+
   if (APP_STATE.isPlaying) {
     Tone.Transport.pause();
     if (playIcon) playIcon.textContent = "play_arrow";
@@ -1239,11 +1236,11 @@ function togglePlay() {
 
 function stopPlay() {
   if (Tone.context.state !== 'running') return;
-  
+
   Tone.Transport.stop();
   Tone.Transport.cancel(0);
   Tone.Transport.position = 0;
-  
+
   document.getElementById("playIcon").textContent = "play_arrow";
   APP_STATE.isPlaying = false;
   document.getElementById("playhead").style.left = "64px";
@@ -1253,7 +1250,7 @@ function stopPlay() {
 function scheduleNotes() {
   Tone.Transport.cancel(0);
   const hasSolo = APP_STATE.tracks.some(track => track.solo);
-  
+
   APP_STATE.notes.forEach(note => {
     const t = APP_STATE.tracks.find(tr => tr.id === note.trackId);
     if (!t || t.mute || (hasSolo && !t.solo)) return;
@@ -1271,21 +1268,21 @@ function scheduleNotes() {
 
 function updatePlayhead() {
   if (!APP_STATE.isPlaying) return;
-  
+
   const ticks = Tone.Transport.ticks;
   const ticksPerBeat = Tone.Transport.PPQ;
   const totalBeats = ticks / ticksPerBeat;
-  
+
   const c = APP_STATE.gridConfig;
   const pxPerBeat = c.subdivisions * c.cellWidth;
   const offset = 64; // adjusted key column spacer offset width
-  
+
   const gridContainer = document.getElementById("gridContainer");
   const scrollOffset = gridContainer ? gridContainer.scrollLeft : 0;
-  
+
   const x = offset + totalBeats * pxPerBeat - scrollOffset;
   document.getElementById("playhead").style.left = `${x}px`;
-  
+
   updatePosDisplay();
   requestAnimationFrame(updatePlayhead);
 }
@@ -1296,7 +1293,7 @@ function updatePosDisplay() {
   const beat = parseInt(pos[1]) + 1;
   const tick = Math.floor(parseFloat(pos[2] || 0));
   const text = `${String(bar).padStart(3, '0')} : ${beat} : ${String(tick).padStart(2, '0')}`;
-  
+
   // Update both mobile and desktop posDisplay elements (duplicate IDs in responsive layout)
   document.querySelectorAll("#posDisplay").forEach(el => { el.innerText = text; });
 }
@@ -1310,19 +1307,19 @@ const TEMPLATES = {
     title: 'EDM Beat',
     bpm: 128,
     tracks: [
-      { id: 0, name: 'Kick',  color: '#ffb4ab', synthType: 'AMSynth',   mute: false, solo: false, vol: -2, pan: 0,    effects: { Reverb: false, Delay: false, Chorus: false } },
-      { id: 1, name: 'Bass',  color: '#d0bcff', synthType: 'MonoSynth', mute: false, solo: false, vol: -5, pan: 0,    effects: { Reverb: false, Delay: false, Chorus: false } },
-      { id: 2, name: 'Lead',  color: '#7fd0ff', synthType: 'AMSynth',   mute: false, solo: false, vol: -4, pan: 0.2,  effects: { Reverb: true,  Delay: true,  Chorus: false } },
-      { id: 3, name: 'Pad',   color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: -10, pan: 0,    effects: { Reverb: true,  Delay: false, Chorus: true  } },
+      { id: 0, name: 'Kick', color: '#ffb4ab', synthType: 'AMSynth', mute: false, solo: false, vol: -2, pan: 0, effects: { Reverb: false, Delay: false, Chorus: false } },
+      { id: 1, name: 'Bass', color: '#d0bcff', synthType: 'MonoSynth', mute: false, solo: false, vol: -5, pan: 0, effects: { Reverb: false, Delay: false, Chorus: false } },
+      { id: 2, name: 'Lead', color: '#7fd0ff', synthType: 'AMSynth', mute: false, solo: false, vol: -4, pan: 0.2, effects: { Reverb: true, Delay: true, Chorus: false } },
+      { id: 3, name: 'Pad', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: -10, pan: 0, effects: { Reverb: true, Delay: false, Chorus: true } },
     ],
     notes: [
-      n(0,0,'C2',0,0.25,120), n(1,0,'C2',1,0.25,115), n(2,0,'C2',2,0.25,120), n(3,0,'C2',3,0.25,115),
-      n(4,0,'C2',4,0.25,120), n(5,0,'C2',5,0.25,115), n(6,0,'C2',6,0.25,120), n(7,0,'C2',7,0.25,115),
-      n(8,1,'C2',0,0.5,110),  n(9,1,'G2',0.5,0.5,105), n(10,1,'C2',1,0.5,110), n(11,1,'G2',1.5,0.5,105),
-      n(12,1,'C2',2,0.5,110), n(13,1,'G2',2.5,0.5,105), n(14,1,'C2',3,0.5,110), n(15,1,'G2',3.5,0.5,105),
-      n(16,2,'G4',0,0.25,90), n(17,2,'A4',0.5,0.25,85), n(18,2,'B4',1,0.5,95), n(19,2,'C5',2,0.5,100),
-      n(20,2,'G4',4,0.25,90), n(21,2,'A4',4.5,0.25,85), n(22,2,'B4',5,0.5,95), n(23,2,'C5',6,0.5,100),
-      n(24,3,'C3',0,2,55), n(25,3,'G3',2,2,50), n(26,3,'C3',4,2,55), n(27,3,'G3',6,2,50),
+      n(0, 0, 'C2', 0, 0.25, 120), n(1, 0, 'C2', 1, 0.25, 115), n(2, 0, 'C2', 2, 0.25, 120), n(3, 0, 'C2', 3, 0.25, 115),
+      n(4, 0, 'C2', 4, 0.25, 120), n(5, 0, 'C2', 5, 0.25, 115), n(6, 0, 'C2', 6, 0.25, 120), n(7, 0, 'C2', 7, 0.25, 115),
+      n(8, 1, 'C2', 0, 0.5, 110), n(9, 1, 'G2', 0.5, 0.5, 105), n(10, 1, 'C2', 1, 0.5, 110), n(11, 1, 'G2', 1.5, 0.5, 105),
+      n(12, 1, 'C2', 2, 0.5, 110), n(13, 1, 'G2', 2.5, 0.5, 105), n(14, 1, 'C2', 3, 0.5, 110), n(15, 1, 'G2', 3.5, 0.5, 105),
+      n(16, 2, 'G4', 0, 0.25, 90), n(17, 2, 'A4', 0.5, 0.25, 85), n(18, 2, 'B4', 1, 0.5, 95), n(19, 2, 'C5', 2, 0.5, 100),
+      n(20, 2, 'G4', 4, 0.25, 90), n(21, 2, 'A4', 4.5, 0.25, 85), n(22, 2, 'B4', 5, 0.5, 95), n(23, 2, 'C5', 6, 0.5, 100),
+      n(24, 3, 'C3', 0, 2, 55), n(25, 3, 'G3', 2, 2, 50), n(26, 3, 'C3', 4, 2, 55), n(27, 3, 'G3', 6, 2, 50),
     ]
   },
   lofi: {
@@ -1330,16 +1327,16 @@ const TEMPLATES = {
     title: 'Lofi Beat',
     bpm: 82,
     tracks: [
-      { id: 0, name: 'Piano', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: -3, pan: -0.2, effects: { Reverb: true,  Delay: true,  Chorus: false } },
-      { id: 1, name: 'Keys',  color: '#d0bcff', synthType: 'PolySynth', mute: false, solo: false, vol: -8, pan: 0.3,  effects: { Reverb: true,  Delay: true,  Chorus: true  } },
-      { id: 2, name: 'Bass',  color: '#7fd0ff', synthType: 'MonoSynth', mute: false, solo: false, vol: -6, pan: 0,    effects: { Reverb: false, Delay: false, Chorus: false } },
+      { id: 0, name: 'Piano', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: -3, pan: -0.2, effects: { Reverb: true, Delay: true, Chorus: false } },
+      { id: 1, name: 'Keys', color: '#d0bcff', synthType: 'PolySynth', mute: false, solo: false, vol: -8, pan: 0.3, effects: { Reverb: true, Delay: true, Chorus: true } },
+      { id: 2, name: 'Bass', color: '#7fd0ff', synthType: 'MonoSynth', mute: false, solo: false, vol: -6, pan: 0, effects: { Reverb: false, Delay: false, Chorus: false } },
     ],
     notes: [
-      n(0,0,'E3',0,1.5,75), n(1,0,'G3',1.5,1,70), n(2,0,'A3',2.5,1.5,72), n(3,0,'B3',4,1,68),
-      n(4,0,'D4',5,1.5,75), n(5,0,'E4',6.5,2,70),
-      n(6,1,'E4',0,4,45), n(7,1,'B3',4,4,42),
-      n(8,2,'E2',0,1,95), n(9,2,'B2',1,1,90), n(10,2,'A2',2,1,88), n(11,2,'G2',3,1,85),
-      n(12,2,'E2',4,1,95), n(13,2,'B2',5,1,90), n(14,2,'A2',6,1,88), n(15,2,'G2',7,1,85),
+      n(0, 0, 'E3', 0, 1.5, 75), n(1, 0, 'G3', 1.5, 1, 70), n(2, 0, 'A3', 2.5, 1.5, 72), n(3, 0, 'B3', 4, 1, 68),
+      n(4, 0, 'D4', 5, 1.5, 75), n(5, 0, 'E4', 6.5, 2, 70),
+      n(6, 1, 'E4', 0, 4, 45), n(7, 1, 'B3', 4, 4, 42),
+      n(8, 2, 'E2', 0, 1, 95), n(9, 2, 'B2', 1, 1, 90), n(10, 2, 'A2', 2, 1, 88), n(11, 2, 'G2', 3, 1, 85),
+      n(12, 2, 'E2', 4, 1, 95), n(13, 2, 'B2', 5, 1, 90), n(14, 2, 'A2', 6, 1, 88), n(15, 2, 'G2', 7, 1, 85),
     ]
   },
   cinematic: {
@@ -1347,16 +1344,16 @@ const TEMPLATES = {
     title: 'Cinematic Theme',
     bpm: 90,
     tracks: [
-      { id: 0, name: 'Strings', color: '#d0bcff', synthType: 'PolySynth', mute: false, solo: false, vol: -6, pan: 0,    effects: { Reverb: true,  Delay: false, Chorus: true  } },
-      { id: 1, name: 'Piano',   color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: -2, pan: -0.1, effects: { Reverb: true,  Delay: true,  Chorus: false } },
-      { id: 2, name: 'Brass',   color: '#ffb4ab', synthType: 'AMSynth',   mute: false, solo: false, vol: -5, pan: 0.2,  effects: { Reverb: true,  Delay: false, Chorus: false } },
+      { id: 0, name: 'Strings', color: '#d0bcff', synthType: 'PolySynth', mute: false, solo: false, vol: -6, pan: 0, effects: { Reverb: true, Delay: false, Chorus: true } },
+      { id: 1, name: 'Piano', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: -2, pan: -0.1, effects: { Reverb: true, Delay: true, Chorus: false } },
+      { id: 2, name: 'Brass', color: '#ffb4ab', synthType: 'AMSynth', mute: false, solo: false, vol: -5, pan: 0.2, effects: { Reverb: true, Delay: false, Chorus: false } },
     ],
     notes: [
-      n(0,0,'C3',0,4,60), n(1,0,'E3',0,4,58), n(2,0,'G3',0,4,55), n(3,0,'C4',0,4,52),
-      n(4,0,'A2',4,4,58), n(5,0,'C3',4,4,55), n(6,0,'E3',4,4,52), n(7,0,'A3',4,4,50),
-      n(8,1,'C4',2,1,85), n(9,1,'E4',3,1,80), n(10,1,'G4',4,1,88), n(11,1,'A4',5,2,82),
-      n(12,1,'G4',7,1,78), n(13,1,'E4',8,1,75),
-      n(14,2,'C4',0,2,70), n(15,2,'G4',2,2,68), n(16,2,'C5',4,3,75), n(17,2,'E5',7,2,72),
+      n(0, 0, 'C3', 0, 4, 60), n(1, 0, 'E3', 0, 4, 58), n(2, 0, 'G3', 0, 4, 55), n(3, 0, 'C4', 0, 4, 52),
+      n(4, 0, 'A2', 4, 4, 58), n(5, 0, 'C3', 4, 4, 55), n(6, 0, 'E3', 4, 4, 52), n(7, 0, 'A3', 4, 4, 50),
+      n(8, 1, 'C4', 2, 1, 85), n(9, 1, 'E4', 3, 1, 80), n(10, 1, 'G4', 4, 1, 88), n(11, 1, 'A4', 5, 2, 82),
+      n(12, 1, 'G4', 7, 1, 78), n(13, 1, 'E4', 8, 1, 75),
+      n(14, 2, 'C4', 0, 2, 70), n(15, 2, 'G4', 2, 2, 68), n(16, 2, 'C5', 4, 3, 75), n(17, 2, 'E5', 7, 2, 72),
     ]
   },
   horror: {
@@ -1364,15 +1361,15 @@ const TEMPLATES = {
     title: 'Horror Ambience',
     bpm: 65,
     tracks: [
-      { id: 0, name: 'Drone',   color: '#534434', synthType: 'PolySynth', mute: false, solo: false, vol: -6, pan: 0,    effects: { Reverb: true,  Delay: true,  Chorus: true  } },
-      { id: 1, name: 'Texture', color: '#7fd0ff', synthType: 'AMSynth',   mute: false, solo: false, vol: -10, pan: -0.3, effects: { Reverb: true,  Delay: true,  Chorus: false } },
-      { id: 2, name: 'Hits',    color: '#ffb4ab', synthType: 'MonoSynth', mute: false, solo: false, vol: -2, pan: 0.2,  effects: { Reverb: true,  Delay: false, Chorus: false } },
+      { id: 0, name: 'Drone', color: '#534434', synthType: 'PolySynth', mute: false, solo: false, vol: -6, pan: 0, effects: { Reverb: true, Delay: true, Chorus: true } },
+      { id: 1, name: 'Texture', color: '#7fd0ff', synthType: 'AMSynth', mute: false, solo: false, vol: -10, pan: -0.3, effects: { Reverb: true, Delay: true, Chorus: false } },
+      { id: 2, name: 'Hits', color: '#ffb4ab', synthType: 'MonoSynth', mute: false, solo: false, vol: -2, pan: 0.2, effects: { Reverb: true, Delay: false, Chorus: false } },
     ],
     notes: [
-      n(0,0,'C3',0,8,45), n(1,0,'D#3',0,8,40),
-      n(2,1,'F#4',1,0.5,55), n(3,1,'G4',3,0.5,50), n(4,1,'A#4',5,0.5,52), n(5,1,'C5',7,0.5,48),
-      n(6,2,'C3',0,0.5,110), n(7,2,'C3',4,0.5,100), n(8,2,'C3',6,0.5,105),
-      n(9,0,'D#3',4,4,42), n(10,0,'A#3',4,4,38),
+      n(0, 0, 'C3', 0, 8, 45), n(1, 0, 'D#3', 0, 8, 40),
+      n(2, 1, 'F#4', 1, 0.5, 55), n(3, 1, 'G4', 3, 0.5, 50), n(4, 1, 'A#4', 5, 0.5, 52), n(5, 1, 'C5', 7, 0.5, 48),
+      n(6, 2, 'C3', 0, 0.5, 110), n(7, 2, 'C3', 4, 0.5, 100), n(8, 2, 'C3', 6, 0.5, 105),
+      n(9, 0, 'D#3', 4, 4, 42), n(10, 0, 'A#3', 4, 4, 38),
     ]
   },
   piano: {
@@ -1383,11 +1380,11 @@ const TEMPLATES = {
       { id: 0, name: 'Piano', color: '#ffc174', synthType: 'PolySynth', mute: false, solo: false, vol: 0, pan: 0, effects: { Reverb: true, Delay: false, Chorus: false } },
     ],
     notes: [
-      n(0,0,'C4',0,0.5,88), n(1,0,'E4',0.5,0.5,82), n(2,0,'G4',1,0.5,85), n(3,0,'A4',1.5,0.5,80),
-      n(4,0,'G4',2,0.5,78), n(5,0,'E4',2.5,0.5,75), n(6,0,'C4',3,1,85),
-      n(7,0,'D4',4,0.5,82), n(8,0,'F4',4.5,0.5,78), n(9,0,'A4',5,0.5,80), n(10,0,'B4',5.5,0.5,76),
-      n(11,0,'C5',6,1.5,90),
-      n(12,0,'E4',8,0.5,80), n(13,0,'G4',8.5,0.5,78), n(14,0,'C5',9,1,85), n(15,0,'G4',10,1,75),
+      n(0, 0, 'C4', 0, 0.5, 88), n(1, 0, 'E4', 0.5, 0.5, 82), n(2, 0, 'G4', 1, 0.5, 85), n(3, 0, 'A4', 1.5, 0.5, 80),
+      n(4, 0, 'G4', 2, 0.5, 78), n(5, 0, 'E4', 2.5, 0.5, 75), n(6, 0, 'C4', 3, 1, 85),
+      n(7, 0, 'D4', 4, 0.5, 82), n(8, 0, 'F4', 4.5, 0.5, 78), n(9, 0, 'A4', 5, 0.5, 80), n(10, 0, 'B4', 5.5, 0.5, 76),
+      n(11, 0, 'C5', 6, 1.5, 90),
+      n(12, 0, 'E4', 8, 0.5, 80), n(13, 0, 'G4', 8.5, 0.5, 78), n(14, 0, 'C5', 9, 1, 85), n(15, 0, 'G4', 10, 1, 75),
     ]
   }
 };
@@ -1398,9 +1395,8 @@ const TRACK_CARD_IDLE = 'bg-surface-container border-outline-variant/10 text-on-
 function setActiveTemplateItem(templateId) {
   document.querySelectorAll('.template-item').forEach(btn => {
     const isActive = btn.dataset.template === templateId;
-    btn.className = `template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer ${
-      isActive ? TRACK_CARD_ACTIVE : TRACK_CARD_IDLE
-    }`;
+    btn.className = `template-item w-[calc(100%-1rem)] mx-2 px-4 py-3 rounded border transition-all flex items-center gap-3 cursor-pointer ${isActive ? TRACK_CARD_ACTIVE : TRACK_CARD_IDLE
+      }`;
     const icon = btn.querySelector('.material-symbols-outlined');
     if (icon) {
       icon.classList.toggle('text-primary', isActive);
@@ -1426,6 +1422,9 @@ function disposeAllAudio() {
 async function applyTemplate(templateId) {
   const tpl = TEMPLATES[templateId];
   if (!tpl) return;
+
+  // Mark audio as initialized so the global first-click handler won't also call setupAudio()
+  window._audioInitialized = true;
 
   if (Tone.context.state !== 'running') {
     await Tone.start();
@@ -1472,15 +1471,15 @@ async function applyTemplate(templateId) {
 
 // 6. Mood / Vibe Arrange Synthesis Engine
 const MOODS = {
-  'Chill':    { bpm: 88,  scale: [0,2,3,5,7,8,10], density: 0.35, octave: 3, pad: false },
-  'Epic':     { bpm: 135, scale: [0,2,4,5,7,9,11],  density: 0.75, octave: 3, pad: true  },
-  'Dark':     { bpm: 72,  scale: [0,1,3,5,7,8,10], density: 0.45, octave: 2, pad: true  },
-  'Dreamy':   { bpm: 95,  scale: [0,2,4,7,9],       density: 0.3,  octave: 4, pad: true  },
-  'Happy':    { bpm: 112, scale: [0,2,4,7,9],       density: 0.55, octave: 3, pad: false },
-  'Groovy':   { bpm: 105, scale: [0,2,4,5,7,9],     density: 0.6,  octave: 3, pad: false },
-  'Ambient':  { bpm: 68,  scale: [0,3,5,7,10],      density: 0.22, octave: 4, pad: true  },
-  'Retro':    { bpm: 118, scale: [0,2,3,7,8],       density: 0.5,  octave: 3, pad: true  },
-  'Intense':  { bpm: 152, scale: [0,1,3,6,8,10],    density: 0.85, octave: 3, pad: false }
+  'Chill': { bpm: 88, scale: [0, 2, 3, 5, 7, 8, 10], density: 0.35, octave: 3, pad: false },
+  'Epic': { bpm: 135, scale: [0, 2, 4, 5, 7, 9, 11], density: 0.75, octave: 4, pad: true },
+  'Dark': { bpm: 72, scale: [0, 1, 3, 5, 7, 8, 10], density: 0.45, octave: 3, pad: true },
+  'Dreamy': { bpm: 95, scale: [0, 2, 4, 7, 9], density: 0.3, octave: 4, pad: true },
+  'Happy': { bpm: 112, scale: [0, 2, 4, 7, 9], density: 0.55, octave: 3, pad: false },
+  'Groovy': { bpm: 105, scale: [0, 2, 4, 5, 7, 9], density: 0.6, octave: 3, pad: false },
+  'Ambient': { bpm: 68, scale: [0, 3, 5, 7, 10], density: 0.22, octave: 4, pad: true },
+  'Retro': { bpm: 118, scale: [0, 2, 3, 7, 8], density: 0.5, octave: 3, pad: true },
+  'Intense': { bpm: 152, scale: [0, 1, 3, 6, 8, 10], density: 0.85, octave: 4, pad: false }
 };
 
 const MOOD_ORDER = ['Chill', 'Epic', 'Dark', 'Dreamy', 'Happy', 'Groovy', 'Ambient', 'Retro', 'Intense'];
@@ -1565,63 +1564,63 @@ function generateMoodMusic(moodName) {
 
     if (moodName === 'Chill') {
       // Sparse: bass on 1 & 3, piano melody with space, no arp
-      pushNote(0, bt,       2.0,  pickNote(sc, oct),       70 + Math.random()*15);  // Bass root
-      if (Math.random() > 0.4) pushNote(0, bt + 2, 2.0, pickNote(sc, oct), 60 + Math.random()*15);
+      pushNote(0, bt, 2.0, pickNote(sc, oct), 70 + Math.random() * 15);  // Bass root
+      if (Math.random() > 0.4) pushNote(0, bt + 2, 2.0, pickNote(sc, oct), 60 + Math.random() * 15);
       // Gentle melody every 2 beats
       [0, 2].forEach(b => {
         if (Math.random() > 0.45) {
-          pushNote(1, bt + b, 1.0, pickNote(sc, oct + 1), 55 + Math.random()*20);
+          pushNote(1, bt + b, 1.0, pickNote(sc, oct + 1), 55 + Math.random() * 20);
         }
       });
       // Soft pad chord on beat 1
-      if (n > 2 && Math.random() > 0.3) pushNote(2, bt, 4.0, pickNote(sc, oct + 1, 4), 40 + Math.random()*15);
+      if (n > 2 && Math.random() > 0.3) pushNote(2, bt, 4.0, pickNote(sc, oct + 1, 4), 40 + Math.random() * 15);
 
     } else if (moodName === 'Epic') {
       // Dense: driving bass every beat, fast arp 8ths, heavy chords on pad
-      pushNote(0, bt,       1.0, pickNote(sc, oct - 1),   110);
-      pushNote(0, bt + 1,   1.0, pickNote(sc, oct - 1),   100);
-      pushNote(0, bt + 2,   1.0, pickNote(sc, oct - 1),   108);
-      pushNote(0, bt + 3,   1.0, pickNote(sc, oct - 1),   95);
+      pushNote(0, bt, 1.0, pickNote(sc, oct - 1), 110);
+      pushNote(0, bt + 1, 1.0, pickNote(sc, oct - 1), 100);
+      pushNote(0, bt + 2, 1.0, pickNote(sc, oct - 1), 108);
+      pushNote(0, bt + 3, 1.0, pickNote(sc, oct - 1), 95);
       // 8th-note arp
       for (let s = 0; s < 8; s++) {
-        pushNote(1, bt + s * 0.5, 0.4, pickNote(sc, oct + 1), 75 + Math.random()*25);
+        pushNote(1, bt + s * 0.5, 0.4, pickNote(sc, oct + 1), 75 + Math.random() * 25);
       }
       // Power chord pad every 2 beats
       if (n > 2) {
-        pushNote(2, bt,       2.0, pickNote(sc, oct,  0), 85);
-        pushNote(2, bt,       2.0, pickNote(sc, oct,  7), 80);
-        pushNote(2, bt + 2,   2.0, pickNote(sc, oct,  0), 80);
-        pushNote(2, bt + 2,   2.0, pickNote(sc, oct,  7), 75);
+        pushNote(2, bt, 2.0, pickNote(sc, oct, 0), 85);
+        pushNote(2, bt, 2.0, pickNote(sc, oct, 7), 80);
+        pushNote(2, bt + 2, 2.0, pickNote(sc, oct, 0), 80);
+        pushNote(2, bt + 2, 2.0, pickNote(sc, oct, 7), 75);
       }
       // Lead fills every other bar
       if (n > 3 && bar % 2 === 0) {
-        [0, 0.5, 1, 1.5].forEach(b => pushNote(3, bt + b, 0.4, pickNote(sc, oct + 2), 90 + Math.random()*20));
+        [0, 0.5, 1, 1.5].forEach(b => pushNote(3, bt + b, 0.4, pickNote(sc, oct + 2), 90 + Math.random() * 20));
       }
 
     } else if (moodName === 'Dark') {
       // Minor: bass drone on 1, dissonant off-beats, brooding melody
-      pushNote(0, bt,       4.0, `C${oct}`,              105);  // root drone
+      pushNote(0, bt, 4.0, `C${oct}`, 105);  // root drone
       if (Math.random() > 0.5) pushNote(0, bt + 2, 1.0, `G${oct - 1}`, 90);
       // Eerie arp on off-beats (8th-triplet feel)
       [0.33, 1.0, 1.66, 2.33, 3.0, 3.66].forEach(b => {
-        if (Math.random() > 0.35) pushNote(1, bt + b, 0.3, pickNote(sc, oct + 1), 50 + Math.random()*30);
+        if (Math.random() > 0.35) pushNote(1, bt + b, 0.3, pickNote(sc, oct + 1), 50 + Math.random() * 30);
       });
       // Slow brooding melody
       if (n > 2) {
         const darkPitches = [0, 2]; // choose beat positions
         darkPitches.forEach(b => {
-          if (Math.random() > 0.3) pushNote(2, bt + b, 1.5, pickNote(sc, oct + 1), 65 + Math.random()*20);
+          if (Math.random() > 0.3) pushNote(2, bt + b, 1.5, pickNote(sc, oct + 1), 65 + Math.random() * 20);
         });
       }
       // Heavy pad held note every bar
-      if (n > 3) pushNote(3, bt, 4.0, pickNote(sc, oct, 3), 55 + Math.random()*15);
+      if (n > 3) pushNote(3, bt, 4.0, pickNote(sc, oct, 3), 55 + Math.random() * 15);
 
     } else if (moodName === 'Dreamy') {
       // Very sparse, held pads, floaty high melody
-      pushNote(0, bt, 4.0, pickNote(sc, oct), 50 + Math.random()*20);  // long bass/pad
+      pushNote(0, bt, 4.0, pickNote(sc, oct), 50 + Math.random() * 20);  // long bass/pad
       // Floating melody, 1-2 notes per bar
       const dreamBeats = [0, 1.5, 3].filter(() => Math.random() > 0.5);
-      dreamBeats.forEach(b => pushNote(1, bt + b, 1.0, pickNote(sc, oct + 2), 45 + Math.random()*25));
+      dreamBeats.forEach(b => pushNote(1, bt + b, 1.0, pickNote(sc, oct + 2), 45 + Math.random() * 25));
       // Pad cluster every 2 bars
       if (n > 2 && bar % 2 === 0) {
         pushNote(2, bt, 8.0, pickNote(sc, oct + 1, 0), 40);
@@ -1630,40 +1629,40 @@ function generateMoodMusic(moodName) {
 
     } else if (moodName === 'Happy') {
       // Upbeat pentatonic: bouncy bass, staccato melody, no dissonance
-      pushNote(0, bt,     1.0, pickNote(sc, oct),       95);
-      pushNote(0, bt + 2, 1.0, pickNote(sc, oct),       88);
+      pushNote(0, bt, 1.0, pickNote(sc, oct), 95);
+      pushNote(0, bt + 2, 1.0, pickNote(sc, oct), 88);
       [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach(b => {
-        if (Math.random() > 0.42) pushNote(1, bt + b, 0.4, pickNote(sc, oct + 1), 70 + Math.random()*25);
+        if (Math.random() > 0.42) pushNote(1, bt + b, 0.4, pickNote(sc, oct + 1), 70 + Math.random() * 25);
       });
-      if (n > 2 && bar % 2 === 0) pushNote(2, bt, 2.0, pickNote(sc, oct + 1, 4), 60 + Math.random()*15);
+      if (n > 2 && bar % 2 === 0) pushNote(2, bt, 2.0, pickNote(sc, oct + 1, 4), 60 + Math.random() * 15);
 
     } else if (moodName === 'Groovy') {
       // Syncopated bass on 1 & "and of 2", funky ghost notes, offbeat accents
-      pushNote(0, bt,       0.5, pickNote(sc, oct),       115); // beat 1
-      pushNote(0, bt + 0.5, 0.25, pickNote(sc, oct),      65);  // ghost
-      pushNote(0, bt + 1.5, 0.5, pickNote(sc, oct),       100); // & of 2
-      pushNote(0, bt + 2,   0.5, pickNote(sc, oct),       88);
-      pushNote(0, bt + 3.5, 0.5, pickNote(sc, oct),       105); // & of 4
+      pushNote(0, bt, 0.5, pickNote(sc, oct), 115); // beat 1
+      pushNote(0, bt + 0.5, 0.25, pickNote(sc, oct), 65);  // ghost
+      pushNote(0, bt + 1.5, 0.5, pickNote(sc, oct), 100); // & of 2
+      pushNote(0, bt + 2, 0.5, pickNote(sc, oct), 88);
+      pushNote(0, bt + 3.5, 0.5, pickNote(sc, oct), 105); // & of 4
       // Funky 16th-note arp with accent on beat 3
       [0, 0.25, 0.75, 1, 1.5, 2, 2.25, 2.75, 3, 3.25, 3.75].forEach(b => {
-        const vel = (b === 2) ? 100 : 55 + Math.random()*25;
+        const vel = (b === 2) ? 100 : 55 + Math.random() * 25;
         if (Math.random() > 0.3) pushNote(1, bt + b, 0.2, pickNote(sc, oct + 1), vel);
       });
-      if (n > 2 && bar % 2 === 1) pushNote(2, bt, 2.0, pickNote(sc, oct + 1), 70 + Math.random()*15);
+      if (n > 2 && bar % 2 === 1) pushNote(2, bt, 2.0, pickNote(sc, oct + 1), 70 + Math.random() * 15);
 
     } else if (moodName === 'Ambient') {
       // Ultra-sparse: very long notes, almost no rhythm
       if (bar % 4 === 0) {
         // New chord block every 4 bars
-        pushNote(0, bt, 8.0, `C${oct}`,                    45 + Math.random()*15);
-        if (n > 1) pushNote(1, bt, 8.0, pickNote(sc, oct + 1, 0), 35 + Math.random()*15);
-        if (n > 2) pushNote(2, bt, 8.0, pickNote(sc, oct + 1, 4), 30 + Math.random()*10);
-        if (n > 3) pushNote(3, bt, 8.0, pickNote(sc, oct + 1, 7), 28 + Math.random()*10);
+        pushNote(0, bt, 8.0, `C${oct}`, 45 + Math.random() * 15);
+        if (n > 1) pushNote(1, bt, 8.0, pickNote(sc, oct + 1, 0), 35 + Math.random() * 15);
+        if (n > 2) pushNote(2, bt, 8.0, pickNote(sc, oct + 1, 4), 30 + Math.random() * 10);
+        if (n > 3) pushNote(3, bt, 8.0, pickNote(sc, oct + 1, 7), 28 + Math.random() * 10);
       }
       // Occasional single floating note
       if (Math.random() > 0.72) {
         const randBeat = Math.floor(Math.random() * 4);
-        pushNote(1, bt + randBeat, 1.5, pickNote(sc, oct + 2), 35 + Math.random()*20);
+        pushNote(1, bt + randBeat, 1.5, pickNote(sc, oct + 2), 35 + Math.random() * 20);
       }
 
     } else if (moodName === 'Retro') {
@@ -1682,7 +1681,7 @@ function generateMoodMusic(moodName) {
       }
       // Short melody hits on beats 1 and 3
       if (n > 2) {
-        pushNote(2, bt,     0.25, pickNote(sc, oct + 2), 100);
+        pushNote(2, bt, 0.25, pickNote(sc, oct + 2), 100);
         pushNote(2, bt + 2, 0.25, pickNote(sc, oct + 2), 95);
         if (Math.random() > 0.5) pushNote(2, bt + 3.5, 0.25, pickNote(sc, oct + 2), 90);
       }
@@ -1693,14 +1692,15 @@ function generateMoodMusic(moodName) {
         pushNote(0, bt + s * 0.25, 0.2, pickNote(sc, oct - 1), 90 + (s % 4 === 0 ? 25 : 0));
       }
       for (let s = 0; s < 16; s++) {
-        pushNote(1, bt + s * 0.25, 0.2, pickNote(sc, oct + 1), 70 + Math.random()*30);
+        pushNote(1, bt + s * 0.25, 0.2, pickNote(sc, oct + 1), 70 + Math.random() * 30);
       }
       if (n > 2) {
-        [0, 1, 2, 3].forEach(b => pushNote(2, bt + b, 0.9, pickNote(sc, oct), 100 + Math.random()*15));
+        [0, 1, 2, 3].forEach(b => pushNote(2, bt + b, 0.9, pickNote(sc, oct), 100 + Math.random() * 15));
       }
       if (n > 3) {
-        [0, 0.5, 1.5, 2, 3, 3.5].forEach(b => pushNote(3, bt + b, 0.4, pickNote(sc, oct + 2), 80 + Math.random()*25));
+        [0, 0.5, 1.5, 2, 3, 3.5].forEach(b => pushNote(3, bt + b, 0.4, pickNote(sc, oct + 2), 80 + Math.random() * 25));
       }
+
     }
   }
 
@@ -1717,7 +1717,7 @@ function showToast(msg) {
     msgEl.textContent = msg;
     toast.style.opacity = "1";
     toast.style.transform = "translate(-50%, 0)";
-    
+
     setTimeout(() => {
       toast.style.opacity = "0";
       toast.style.transform = "translate(-50%, 16px)";
@@ -1833,50 +1833,50 @@ function drawVisualizers() {
     const w = freqCanvas.width;
     const h = freqCanvas.height;
     if (w > 0 && h > 0) {
-    ctx.fillStyle = "#0e0e10";
-    ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#0e0e10";
+      ctx.fillRect(0, 0, w, h);
 
-    const values = fftAnalyser.getValue();
-    const numBars = VIS_STATE.barHeights.length;
-    const barWidth = w / numBars;
-    const gap = 1.5;
-    const maxH = h - 10;
-    let totalEnergy = 0;
+      const values = fftAnalyser.getValue();
+      const numBars = VIS_STATE.barHeights.length;
+      const barWidth = w / numBars;
+      const gap = 1.5;
+      const maxH = h - 10;
+      let totalEnergy = 0;
 
-    for (let i = 0; i < numBars; i++) {
-      const binStart = Math.floor((i / numBars) * values.length);
-      const binEnd = Math.floor(((i + 1) / numBars) * values.length);
-      let sum = 0;
-      for (let b = binStart; b < binEnd; b++) sum += values[b];
-      const avgDb = sum / (binEnd - binStart || 1);
-      const fftNorm = isFinite(avgDb) ? Math.max(0, (avgDb + 85) / 85) : 0;
-      totalEnergy += fftNorm;
+      for (let i = 0; i < numBars; i++) {
+        const binStart = Math.floor((i / numBars) * values.length);
+        const binEnd = Math.floor(((i + 1) / numBars) * values.length);
+        let sum = 0;
+        for (let b = binStart; b < binEnd; b++) sum += values[b];
+        const avgDb = sum / (binEnd - binStart || 1);
+        const fftNorm = isFinite(avgDb) ? Math.max(0, (avgDb + 85) / 85) : 0;
+        totalEnergy += fftNorm;
 
-      const idleWave = 0.12 + Math.sin(now * 2.1 + i * 0.35) * 0.08
-                     + Math.sin(now * 0.7 + i * 0.12) * 0.05;
-      const target = Math.max(idleWave, fftNorm * 0.92) * maxH;
-      VIS_STATE.barHeights[i] = visLerp(VIS_STATE.barHeights[i], target, totalEnergy > 0.08 ? 0.28 : 0.14);
+        const idleWave = 0.12 + Math.sin(now * 2.1 + i * 0.35) * 0.08
+          + Math.sin(now * 0.7 + i * 0.12) * 0.05;
+        const target = Math.max(idleWave, fftNorm * 0.92) * maxH;
+        VIS_STATE.barHeights[i] = visLerp(VIS_STATE.barHeights[i], target, totalEnergy > 0.08 ? 0.28 : 0.14);
 
-      const barH = VIS_STATE.barHeights[i];
-      const x = i * barWidth;
-      const y = h - barH;
-      const t = i / (numBars - 1);
+        const barH = VIS_STATE.barHeights[i];
+        const x = i * barWidth;
+        const y = h - barH;
+        const t = i / (numBars - 1);
 
-      const grad = ctx.createLinearGradient(x, h, x + barWidth, 0);
-      grad.addColorStop(0, visGradientColor(t, 0.55));
-      grad.addColorStop(0.6, visGradientColor(Math.min(1, t + 0.15), 0.75));
-      grad.addColorStop(1, visGradientColor(Math.min(1, t + 0.35), 0.95));
+        const grad = ctx.createLinearGradient(x, h, x + barWidth, 0);
+        grad.addColorStop(0, visGradientColor(t, 0.55));
+        grad.addColorStop(0.6, visGradientColor(Math.min(1, t + 0.15), 0.75));
+        grad.addColorStop(1, visGradientColor(Math.min(1, t + 0.35), 0.95));
 
-      const radius = Math.min(4, (barWidth - gap * 2) / 2);
-      ctx.fillStyle = grad;
-      roundRect(ctx, x + gap, y, barWidth - gap * 2, barH, radius);
-      ctx.fill();
+        const radius = Math.min(4, (barWidth - gap * 2) / 2);
+        ctx.fillStyle = grad;
+        roundRect(ctx, x + gap, y, barWidth - gap * 2, barH, radius);
+        ctx.fill();
 
-      if (barH > maxH * 0.35) {
-        ctx.fillStyle = visGradientColor(t, 0.35);
-        ctx.fillRect(x + gap, y - 1, barWidth - gap * 2, 2);
+        if (barH > maxH * 0.35) {
+          ctx.fillStyle = visGradientColor(t, 0.35);
+          ctx.fillRect(x + gap, y - 1, barWidth - gap * 2, 2);
+        }
       }
-    }
     }
   }
 
@@ -1887,82 +1887,82 @@ function drawVisualizers() {
     const w = circleCanvas.width;
     const h = circleCanvas.height;
     if (w > 0 && h > 0) {
-    ctx.fillStyle = "#0e0e10";
-    ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#0e0e10";
+      ctx.fillRect(0, 0, w, h);
 
-    const values = fftAnalyser.getValue();
-    const cx = w / 2;
-    const cy = h / 2;
-    const baseR = Math.min(w, h) * 0.18;
-    const maxSpike = Math.min(w, h) * 0.3;
-    const numPoints = VIS_STATE.circleRadii.length;
+      const values = fftAnalyser.getValue();
+      const cx = w / 2;
+      const cy = h / 2;
+      const baseR = Math.min(w, h) * 0.18;
+      const maxSpike = Math.min(w, h) * 0.3;
+      const numPoints = VIS_STATE.circleRadii.length;
 
-    // Beat pump: expand on beat, contract between (forth and back)
-    const bpm = APP_STATE.bpm || 120;
-    const beatHz = bpm / 60;
-    const beatPhase = now * beatHz * Math.PI * 2;
-    const beatPump = 0.42 + 0.58 * Math.pow(Math.max(0, Math.sin(beatPhase)), 1.4);
+      // Beat pump: expand on beat, contract between (forth and back)
+      const bpm = APP_STATE.bpm || 120;
+      const beatHz = bpm / 60;
+      const beatPhase = now * beatHz * Math.PI * 2;
+      const beatPump = 0.42 + 0.58 * Math.pow(Math.max(0, Math.sin(beatPhase)), 1.4);
 
-    const ringPulse = 0.15 + beatPump * 0.25;
-    ctx.beginPath();
-    ctx.arc(cx, cy, baseR * (0.92 + beatPump * 0.08), 0, Math.PI * 2);
-    const ringGrad = ctx.createRadialGradient(cx, cy, baseR * 0.4, cx, cy, baseR);
-    ringGrad.addColorStop(0, visGradientColor(0, 0.06));
-    ringGrad.addColorStop(1, visGradientColor(0.5, ringPulse));
-    ctx.strokeStyle = ringGrad;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+      const ringPulse = 0.15 + beatPump * 0.25;
+      ctx.beginPath();
+      ctx.arc(cx, cy, baseR * (0.92 + beatPump * 0.08), 0, Math.PI * 2);
+      const ringGrad = ctx.createRadialGradient(cx, cy, baseR * 0.4, cx, cy, baseR);
+      ringGrad.addColorStop(0, visGradientColor(0, 0.06));
+      ringGrad.addColorStop(1, visGradientColor(0.5, ringPulse));
+      ctx.strokeStyle = ringGrad;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
-    let fftEnergy = 0;
-    const angles = [];
-    for (let i = 0; i < numPoints; i++) {
-      const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
-      angles.push(angle);
-      const valIdx = Math.floor((i / numPoints) * values.length);
-      const db = values[valIdx];
-      const fftNorm = isFinite(db) ? Math.max(0, (db + 85) / 85) : 0;
-      fftEnergy += fftNorm;
+      let fftEnergy = 0;
+      const angles = [];
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
+        angles.push(angle);
+        const valIdx = Math.floor((i / numPoints) * values.length);
+        const db = values[valIdx];
+        const fftNorm = isFinite(db) ? Math.max(0, (db + 85) / 85) : 0;
+        fftEnergy += fftNorm;
 
-      const wobble = Math.sin(now * 3 + i * 0.4) * 0.03;
-      const spikeBase = 0.12 + beatPump * 0.22 + wobble;
-      const targetLen = baseR + Math.max(spikeBase, fftNorm * 0.9 * beatPump) * maxSpike;
-      VIS_STATE.circleRadii[i] = visLerp(VIS_STATE.circleRadii[i], targetLen, fftEnergy > 0.06 ? 0.32 : 0.18);
-    }
-
-    ctx.beginPath();
-    for (let i = 0; i < numPoints; i++) {
-      const px = cx + Math.cos(angles[i]) * VIS_STATE.circleRadii[i];
-      const py = cy + Math.sin(angles[i]) * VIS_STATE.circleRadii[i];
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-    ctx.closePath();
-    const blobGrad = ctx.createRadialGradient(cx - baseR * 0.3, cy, 0, cx, cy, baseR + maxSpike);
-    blobGrad.addColorStop(0, visGradientColor(0, 0.14));
-    blobGrad.addColorStop(0.55, visGradientColor(0.45, 0.07));
-    blobGrad.addColorStop(1, visGradientColor(1, 0.04));
-    ctx.fillStyle = blobGrad;
-    ctx.fill();
-
-    for (let i = 0; i < numPoints; i++) {
-      const angle = angles[i];
-      const valIdx = Math.floor((i / numPoints) * values.length);
-      const db = values[valIdx];
-      const fftNorm = isFinite(db) ? Math.max(0, (db + 85) / 85) : 0;
-      const x1 = cx + Math.cos(angle) * baseR;
-      const y1 = cy + Math.sin(angle) * baseR;
-      const x2 = cx + Math.cos(angle) * VIS_STATE.circleRadii[i];
-      const y2 = cy + Math.sin(angle) * VIS_STATE.circleRadii[i];
-      const t = (Math.cos(angle) + 1) / 2;
+        const wobble = Math.sin(now * 3 + i * 0.4) * 0.03;
+        const spikeBase = 0.12 + beatPump * 0.22 + wobble;
+        const targetLen = baseR + Math.max(spikeBase, fftNorm * 0.9 * beatPump) * maxSpike;
+        VIS_STATE.circleRadii[i] = visLerp(VIS_STATE.circleRadii[i], targetLen, fftEnergy > 0.06 ? 0.32 : 0.18);
+      }
 
       ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.strokeStyle = visGradientColor(t, 0.4 + (VIS_STATE.circleRadii[i] - baseR) / maxSpike * 0.5);
-      ctx.lineWidth = fftNorm > 0.05 ? 2 : 1.25;
-      ctx.lineCap = "round";
-      ctx.stroke();
-    }
+      for (let i = 0; i < numPoints; i++) {
+        const px = cx + Math.cos(angles[i]) * VIS_STATE.circleRadii[i];
+        const py = cy + Math.sin(angles[i]) * VIS_STATE.circleRadii[i];
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      const blobGrad = ctx.createRadialGradient(cx - baseR * 0.3, cy, 0, cx, cy, baseR + maxSpike);
+      blobGrad.addColorStop(0, visGradientColor(0, 0.14));
+      blobGrad.addColorStop(0.55, visGradientColor(0.45, 0.07));
+      blobGrad.addColorStop(1, visGradientColor(1, 0.04));
+      ctx.fillStyle = blobGrad;
+      ctx.fill();
+
+      for (let i = 0; i < numPoints; i++) {
+        const angle = angles[i];
+        const valIdx = Math.floor((i / numPoints) * values.length);
+        const db = values[valIdx];
+        const fftNorm = isFinite(db) ? Math.max(0, (db + 85) / 85) : 0;
+        const x1 = cx + Math.cos(angle) * baseR;
+        const y1 = cy + Math.sin(angle) * baseR;
+        const x2 = cx + Math.cos(angle) * VIS_STATE.circleRadii[i];
+        const y2 = cy + Math.sin(angle) * VIS_STATE.circleRadii[i];
+        const t = (Math.cos(angle) + 1) / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = visGradientColor(t, 0.4 + (VIS_STATE.circleRadii[i] - baseR) / maxSpike * 0.5);
+        ctx.lineWidth = fftNorm > 0.05 ? 2 : 1.25;
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
     }
   }
 
@@ -1973,35 +1973,35 @@ function drawVisualizers() {
     const w = waveCanvas.width;
     const h = waveCanvas.height;
     if (w > 0 && h > 0) {
-    const centerY = h / 2;
+      const centerY = h / 2;
 
-    ctx.fillStyle = "#0e0e10";
-    ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#0e0e10";
+      ctx.fillRect(0, 0, w, h);
 
-    const raw = waveformAnalyser.getValue();
-    const smoothed = smoothSamples(raw, 3);
-    const amp = smoothed.reduce((s, v) => s + Math.abs(v), 0) / smoothed.length;
-    const step = Math.max(1, Math.floor(smoothed.length / 80));
-    const points = [];
-    const drift = VIS_STATE.wavePhase;
+      const raw = waveformAnalyser.getValue();
+      const smoothed = smoothSamples(raw, 3);
+      const amp = smoothed.reduce((s, v) => s + Math.abs(v), 0) / smoothed.length;
+      const step = Math.max(1, Math.floor(smoothed.length / 80));
+      const points = [];
+      const drift = VIS_STATE.wavePhase;
 
-    for (let i = 0; i < smoothed.length; i += step) {
-      const idx = i / smoothed.length;
-      let v = smoothed[i];
-      if (amp < 0.02) {
-        const t = idx * Math.PI * 4 + drift;
-        v = Math.sin(t) * 0.14 + Math.sin(t * 1.7 + 1.2) * 0.06 + Math.sin(t * 0.4) * 0.03;
-      } else {
-        v = v * 0.9 + Math.sin(idx * Math.PI * 6 + drift * 0.5) * 0.02;
+      for (let i = 0; i < smoothed.length; i += step) {
+        const idx = i / smoothed.length;
+        let v = smoothed[i];
+        if (amp < 0.02) {
+          const t = idx * Math.PI * 4 + drift;
+          v = Math.sin(t) * 0.14 + Math.sin(t * 1.7 + 1.2) * 0.06 + Math.sin(t * 0.4) * 0.03;
+        } else {
+          v = v * 0.9 + Math.sin(idx * Math.PI * 6 + drift * 0.5) * 0.02;
+        }
+        points.push(v);
       }
-      points.push(v);
-    }
 
-    drawSmoothWave(ctx, points, w, h, {
-      centerY,
-      amplitudeScale: amp < 0.02 ? 0.36 : 0.4,
-      lineWidth: 1.75
-    });
+      drawSmoothWave(ctx, points, w, h, {
+        centerY,
+        amplitudeScale: amp < 0.02 ? 0.36 : 0.4,
+        lineWidth: 1.75
+      });
     }
   }
 }
