@@ -16,7 +16,7 @@ Built as a UID (User Interface Design) project. Everything runs in the browser: 
 - Piano roll: click to add notes, right-click to remove, select to edit in the side panel
 - Tracks mixer: volume, pan, mute, solo, add/delete tracks
 - Five **templates** in the left sidebar (below your track list): EDM Beat, Lofi Beat, Cinematic Theme, Horror Ambience, Piano Melody
-- **AI Mood Composer** in the footer: twelve moods plus a text prompt and Generate button
+- **AI Mood Composer** in the footer: nine moods plus a text prompt and Generate button
 - Live audio visualizers (frequency bars, always-vibrating circular spectrum, smoothed waveform) with teal-to-beige gradients
 - **Mobile responsive**: scrollable vertical layout on phones with horizontal mood pill strip
 - Virtual keyboard, BPM/key/scale controls, save, reset, and JSON export
@@ -31,6 +31,8 @@ There is also a separate `portfolio/index.html` train animation page if you want
 
 ## LIVE AT:
 > https://tenisha5132.github.io/HARMONICA_UID_PROJECT/studio.html
+
+---
 
 **Demo login**
 
@@ -97,9 +99,9 @@ Click a template to replace the current arrangement. The project title updates t
 
 ---
 
-## AI Mood Composer (twelve moods)
+## AI Mood Composer (nine moods)
 
-Pick a mood, then hit **Generate**. This is a built-in pattern engine — not a real AI API — but it fills the grid quickly with something that fits the vibe. Each mood has its own unique generation strategy: different rhythms, note densities, syncopation patterns, and instrument assignments.
+Pick a mood, then hit **Generate**. This is a built-in pattern engine — not a real AI API — but it fills the grid quickly with something that fits the vibe.
 
 | Mood | BPM | Feel |
 |------|-----|------|
@@ -112,9 +114,6 @@ Pick a mood, then hit **Generate**. This is a built-in pattern engine — not a 
 | Ambient | 68 | Airy, ultra-minimal, long sustains |
 | Retro | 118 | 8-bit chiptune staccato |
 | Intense | 152 | 16th-note walls of sound |
-| EDM | 128 | Four-on-the-floor, supersaw arps |
-| Lofi | 80 | Swung jazz chords, vinyl-gap melody |
-| Cinematic | 60 | Orchestral swells, crescendo build |
 
 You can also type a theme in the prompt box (for your own notes — generation still uses the selected mood).
 
