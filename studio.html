@@ -21,7 +21,7 @@
     <link href="css/harmonica-ds.css" rel="stylesheet"/>
     <link href="css/main.css" rel="stylesheet"/>
 </head>
-<body class="bg-background text-on-surface font-body-md h-screen w-screen overflow-hidden flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<body class="bg-background text-on-surface font-body-md min-h-screen w-screen overflow-y-auto md:overflow-hidden md:h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
     <!-- TopAppBar -->
     <header class="w-full bg-surface shadow-sm border-b border-outline-variant/20 z-50">
         <!-- Row 1: Logo + Back | Title (center) | BPM+Key (desktop inline) | Actions -->
@@ -109,9 +109,9 @@
     </header>
     
     <!-- Main Workspace -->
-    <main class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden relative">
+    <main class="flex-1 min-h-0 flex flex-col md:flex-row overflow-visible md:overflow-hidden relative">
         <!-- SideNavBar / Mix Panel -->
-        <aside class="flex flex-col w-full h-[32%] max-h-[36vh] md:h-full md:max-h-none md:w-sidebar-width bg-surface-container-low shadow-md z-40 border-b md:border-b-0 md:border-r border-outline-variant/20 flex-shrink-0 min-h-0">
+        <aside class="flex flex-col w-full md:h-full md:max-h-none md:w-sidebar-width bg-surface-container-low shadow-md z-40 border-b md:border-b-0 md:border-r border-outline-variant/20 flex-shrink-0 min-h-0">
             <div class="p-gutter py-2 md:py-3 border-b border-outline-variant/20 flex justify-between items-center shrink-0">
                 <div>
                     <h2 class="font-headline-md text-headline-md text-on-surface mb-1">TRACKS</h2>
@@ -181,7 +181,7 @@
         </aside>
         
         <!-- Central Canvas Sequencer Wrapper -->
-        <section class="flex-1 bg-background relative overflow-hidden flex flex-col z-10" id="sequencerGrid">
+        <section class="flex-1 bg-background relative overflow-hidden flex flex-col z-10 min-h-[420px] md:min-h-0" id="sequencerGrid">
             <!-- Timeline / Ruler Bar -->
             <div class="h-8 border-b border-surface-container-high flex bg-surface-container-lowest shrink-0">
                 <div class="w-16 border-r border-surface-container-high shrink-0 bg-surface-container-lowest"></div> <!-- Piano keys alignment offset spacer -->
@@ -270,7 +270,7 @@
         </section>
         
         <!-- Right Inspector (Track & Note controls) -->
-        <aside class="hidden xl:flex w-inspector-width bg-surface-container-low shadow-2xl border-l border-outline-variant/20 flex-col z-40">
+        <aside class="hidden lg:flex w-inspector-width bg-surface-container-low shadow-2xl border-l border-outline-variant/20 flex-col z-40 min-h-0">
             <div class="p-gutter border-b border-outline-variant/20 flex items-center gap-3">
                 <span class="material-symbols-outlined text-primary" id="inspectorIcon">piano</span>
                 <div>
@@ -472,12 +472,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="ai-mood-scroll flex-1 min-h-[4.5rem] max-h-[10rem] overflow-y-auto custom-scrollbar p-2">
-                    <div class="flex flex-wrap gap-1.5" id="moodPillsContainerMobile"></div>
-                </div>
-                <div class="ai-mood-scroll-hint shrink-0 flex items-center justify-center gap-1 py-1 text-[9px] font-label-mono text-on-surface-variant/50 border-t border-outline-variant/10">
-                    <span class="material-symbols-outlined text-[14px]">south</span>
-                    <span>Scroll for more moods</span>
+                <div class="ai-mood-scroll shrink-0 overflow-x-auto overflow-y-hidden custom-scrollbar p-2">
+                    <div class="flex gap-1.5 flex-nowrap" id="moodPillsContainerMobile"></div>
                 </div>
             </div>
 
