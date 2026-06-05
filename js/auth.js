@@ -18,6 +18,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Auth Mode Tabs Logic
+  const tabSignIn = document.getElementById("tabSignIn");
+  const tabSignUp = document.getElementById("tabSignUp");
+  const formTitle = document.getElementById("formTitle");
+  const formSubtitle = document.getElementById("formSubtitle");
+  const emailInput = document.getElementById("email");
+  const submitBtnText = loginForm?.querySelector("button[type='submit'] span");
+
+  let isSignUpMode = false;
+
+  if (tabSignIn && tabSignUp) {
+    tabSignIn.addEventListener("click", () => {
+      isSignUpMode = false;
+      tabSignIn.classList.add("text-primary", "font-bold", "border-b-2", "border-primary");
+      tabSignIn.classList.remove("text-on-surface-variant", "hover:text-on-surface");
+      
+      tabSignUp.classList.remove("text-primary", "font-bold", "border-b-2", "border-primary");
+      tabSignUp.classList.add("text-on-surface-variant", "hover:text-on-surface");
+      
+      if (formTitle) formTitle.textContent = "Initialize Session";
+      if (formSubtitle) formSubtitle.textContent = "Access your studio workspace.";
+      if (submitBtnText) submitBtnText.textContent = "Engage";
+      
+      // Restore demo credentials
+      if (emailInput) emailInput.value = "producer@studio.local";
+      if (passwordInput) passwordInput.value = "Harmonica_2026!";
+    });
+
+    tabSignUp.addEventListener("click", () => {
+      isSignUpMode = true;
+      tabSignUp.classList.add("text-primary", "font-bold", "border-b-2", "border-primary");
+      tabSignUp.classList.remove("text-on-surface-variant", "hover:text-on-surface");
+      
+      tabSignIn.classList.remove("text-primary", "font-bold", "border-b-2", "border-primary");
+      tabSignIn.classList.add("text-on-surface-variant", "hover:text-on-surface");
+      
+      if (formTitle) formTitle.textContent = "Create Profile";
+      if (formSubtitle) formSubtitle.textContent = "Join the next generation of sound.";
+      if (submitBtnText) submitBtnText.textContent = "Create Account";
+      
+      // Clear inputs for new credentials
+      if (emailInput) emailInput.value = "";
+      if (passwordInput) passwordInput.value = "";
+    });
+  }
+
   // 2. Simulated Hardware Session Engagement with Strict Form Validation
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
